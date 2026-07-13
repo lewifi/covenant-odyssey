@@ -16,5 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured git to ignore the `Assets` folder and untracked it from the repository.
 - Documented visual assets and styling themes inside `IDEA.md` for project alignment.
 - Updated root `.gitignore` to ignore personal editor settings, test outputs, and secrets, and untracked `.vscode/` directories.
+- Created root `README.md` introducing the project vision, features, and setup references.
 
 
