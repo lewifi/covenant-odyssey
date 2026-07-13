@@ -9,4 +9,19 @@
   - [x] Implement game UI dashboard in `frontend/src/app/index.tsx`
 - [x] Verify local execution of the projects
 - [x] Create walkthrough of the changes
-- [/] Set up Git & push to GitHub (awaiting user remote URL)
+- [x] Set up Git & push to GitHub
+
+## Phase 1: Gemini AI Story Generation Engine
+- [ ] Bind `GEMINI_API_KEY` to the Worker backend locally and in production env
+- [ ] Implement Worker endpoint `/api/generate-scene` to handle structured prompts and return JSON scenes
+- [ ] Connect Zustand frontend store to fetch real scenes dynamically from backend Worker
+
+## Phase 2: Save System & State Persistence (Cloudflare D1)
+- [ ] Design migration schemas for saving/loading states in D1 database
+- [ ] Create `/api/save` and `/api/load` routes in backend Worker
+- [ ] Implement game save state syncing in frontend application
+
+## Phase 3: Text-to-Speech (Gemini TTS) & SFX
+- [ ] Implement Worker routing for speech synthesis via Gemini TTS
+- [ ] Integrate HTML5 / Native sound playback in frontend using Zustand triggers
+
