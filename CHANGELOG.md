@@ -12,3 +12,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Established primary tech stack in `ARCHITECTURE.md` including React, Expo, Zustand, Cloudflare Workers, D1 database, R2 storage, Claude (for architecture/oversight), and Gemini TTS.
 - Created `CHANGELOG.md` to track repository progression.
 - Configured repository setup to ignore iOS builds and tests for now.
+- Updated `IDEA.md` with detailed Add-on Story Arcs (Genesis, Exodus & Conquest, Kingdoms & Prophets, Exile & Return, Fulfillment).
+

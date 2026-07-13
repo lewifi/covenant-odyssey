@@ -24,4 +24,15 @@ Epic, cinematic, emotionally charged, and spiritually reflective — blending th
 ## Target Audience
 Adults interested in deep, honest engagement with biblical themes through interactive fiction.
 
+## Add-on Story Arcs (DLC / In-App Purchases)
+These are separate generative modules that can be unlocked individually or as a bundle:
+
+- **Genesis Cycle** – Creation, Eden, Flood, Patriarchs (Abraham, Isaac, Jacob) — heavy on wonder, temptation, family drama, and covenant origins.
+- **Exodus & Conquest** – Plagues, Red Sea, wilderness, battles for the Promised Land (Joshua, Judges) — epic wars, leadership, rebellion.
+- **Kingdoms & Prophets** – Saul, David, Solomon, divided kingdom, prophetic voices (current starting arc).
+- **Exile & Return** – Babylonian captivity, restoration, wisdom literature.
+- **Fulfillment Arc** – Life, teachings, betrayal, crucifixion, and resurrection echoes (mature themes possible).
+
+Users start with the Kingdoms & Prophets arc (your Eliab story). Other arcs are paid add-ons ($1.99–$3.99 each) or part of the Premium bundle. The generative engine can reference or blend arcs at convergence points for crossover playthroughs.
+
 Last Updated: July 14, 2026
