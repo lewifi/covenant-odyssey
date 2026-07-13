@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated root `.gitignore` to ignore personal editor settings, test outputs, and secrets, and untracked `.vscode/` directories.
 - Created root `README.md` introducing the project vision, features, and setup references.
 - Documented API key separation (Story, TTS, and Image generation) in `ARCHITECTURE.md` and local `.dev.vars` configurations.
+- Implemented the Gemini AI Story Generation Engine (Phase 1): created `/api/generate-scene` endpoint with OpenAI fallback inside backend Worker, and connected it to the frontend Zustand store with local mock fallbacks.
+
 
 
 

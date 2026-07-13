@@ -73,32 +73,74 @@ export const useGameStore = create<GameState>((set) => ({
   isLoading: false,
   adGateTriggered: false,
 
-  makeChoice: (choice: Choice) =>
-    set((state) => {
-      // Calculate new alignments
-      const righteous = state.righteous + (choice.alignmentEffect.righteous || 0);
-      const pragmatic = state.pragmatic + (choice.alignmentEffect.pragmatic || 0);
-      const rebel = state.rebel + (choice.alignmentEffect.rebel || 0);
+  makeChoice: async (choice: Choice) => {
+    const { sceneId, history, righteous, pragmatic, rebel, isPremiumUnlocked, isLoading } = useGameStore.getState();
+    if (isLoading) return;
 
-      // Simple mock scene progression
-      const nextSceneId = choice.nextSceneId || (parseInt(state.sceneId) + 1).toString();
-      const sceneIdNum = parseInt(nextSceneId);
+    // Calculate new alignments
+    const nextRighteous = righteous + (choice.alignmentEffect.righteous || 0);
+    const nextPragmatic = pragmatic + (choice.alignmentEffect.pragmatic || 0);
+    const nextRebel = rebel + (choice.alignmentEffect.rebel || 0);
 
-      // Check for ad gate
-      if (sceneIdNum > 4 && !state.isPremiumUnlocked) {
-        return {
-          adGateTriggered: true,
-        };
+    const nextSceneId = choice.nextSceneId || (parseInt(sceneId) + 1).toString();
+    const sceneIdNum = parseInt(nextSceneId);
+
+    // Check for ad gate
+    if (sceneIdNum > 4 && !isPremiumUnlocked) {
+      useGameStore.setState({ adGateTriggered: true });
+      return;
+    }
+
+    useGameStore.setState({ isLoading: true });
+    const newHistory = [...history, choice.id];
+
+    try {
+      const response = await fetch('http://localhost:8787/api/generate-scene', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sceneId: nextSceneId,
+          history: newHistory,
+          righteous: nextRighteous,
+          pragmatic: nextPragmatic,
+          rebel: nextRebel,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Worker API returned status ${response.status}`);
       }
 
-      // Generate dynamic scene content (placeholder for Gemini output)
+      const data = await response.json() as {
+        sceneTitle: string;
+        sceneText: string;
+        choices: Choice[];
+      };
+
+      useGameStore.setState({
+        sceneId: nextSceneId,
+        sceneTitle: data.sceneTitle,
+        sceneText: data.sceneText,
+        choices: data.choices,
+        history: newHistory,
+        righteous: nextRighteous,
+        pragmatic: nextPragmatic,
+        rebel: nextRebel,
+        isLoading: false,
+      });
+
+    } catch (error) {
+      console.warn("Worker API error, using local fallback content:", error);
+      
       let sceneTitle = `Scene ${nextSceneId}`;
       let sceneText = '';
       let nextChoices: Choice[] = [];
 
       if (nextSceneId === '2') {
         sceneTitle = 'The Whispering Oaks';
-        sceneText = `You have moved deeper into the oak forests. Your choice to ${choice.text.toLowerCase().replace('.', '')} has shifted the balance. Righteous: ${righteous}, Pragmatic: ${pragmatic}, Rebel: ${rebel}. Eliab watches you closely. What will you do next?`;
+        sceneText = `You have moved deeper into the oak forests. Your choice to ${choice.text.toLowerCase().replace('.', '')} has shifted the balance. Righteous: ${nextRighteous}, Pragmatic: ${nextPragmatic}, Rebel: ${nextRebel}. Eliab watches you closely. (Running in offline fallback mode).`;
         nextChoices = [
           {
             id: 'pray_guidance',
@@ -121,7 +163,7 @@ export const useGameStore = create<GameState>((set) => ({
         ];
       } else if (nextSceneId === '3') {
         sceneTitle = 'The Eve of Battle';
-        sceneText = 'The air is thick with tension. Campfires dot the opposing ridges. A silent messenger delivers a scroll. It contains terms of surrender or a duel to the death. The choice is yours to counsel the king.';
+        sceneText = 'The air is thick with tension. Campfires dot the opposing ridges. A silent messenger delivers a scroll. It contains terms of surrender or a duel to the death. The choice is yours to counsel the king. (Running in offline fallback mode).';
         nextChoices = [
           {
             id: 'counsel_faith',
@@ -144,7 +186,7 @@ export const useGameStore = create<GameState>((set) => ({
         ];
       } else if (nextSceneId === '4') {
         sceneTitle = 'The Crucible';
-        sceneText = 'You stand before the giant champion of Gath. His shield glimmers in the morning sun. Behind you, the hosts of Israel hold their breath. This is the fourth scene—the limit of the free tier. Your final strike awaits.';
+        sceneText = 'You stand before the giant champion of Gath. His shield glimmers in the morning sun. Behind you, the hosts of Israel hold their breath. This is the fourth scene—the limit of the free tier. Your final strike awaits. (Running in offline fallback mode).';
         nextChoices = [
           {
             id: 'strike_righteous',
@@ -167,7 +209,7 @@ export const useGameStore = create<GameState>((set) => ({
         ];
       } else {
         sceneTitle = `Chapter II: Scene ${nextSceneId}`;
-        sceneText = `You have unlocked the premium story! You are moving further along the path of alignment. Righteousness: ${righteous}, Pragmatism: ${pragmatic}, Rebellion: ${rebel}. The odyssey continues.`;
+        sceneText = `You have unlocked the premium story! You are moving further along the path of alignment. Righteousness: ${nextRighteous}, Pragmatism: ${nextPragmatic}, Rebellion: ${nextRebel}. The odyssey continues. (Running in offline fallback mode).`;
         nextChoices = [
           {
             id: 'continue_journey',
@@ -184,17 +226,19 @@ export const useGameStore = create<GameState>((set) => ({
         ];
       }
 
-      return {
+      useGameStore.setState({
         sceneId: nextSceneId,
         sceneTitle,
         sceneText,
         choices: nextChoices,
-        history: [...state.history, choice.id],
-        righteous,
-        pragmatic,
-        rebel,
-      };
-    }),
+        history: newHistory,
+        righteous: nextRighteous,
+        pragmatic: nextPragmatic,
+        rebel: nextRebel,
+        isLoading: false,
+      });
+    }
+  },
 
   setTtsEnabled: (enabled: boolean) => set({ ttsEnabled: enabled }),
   unlockPremium: () => set({ isPremiumUnlocked: true, adGateTriggered: false }),
