@@ -47,21 +47,14 @@ npm run test
 
 ---
 
-## 🐙 Step 4: Connecting to GitHub & Pushing
+## 🐙 Step 4: Git Workflow
 
-A local Git repository has been initialized at the root of the project. To link it to your GitHub repository and perform the initial commit/push, execute the following commands in PowerShell:
+The remote repository has been successfully set up and the initial commit pushed to:
+`https://github.com/lewifi/covenant-odyssey.git`
 
+To commit and push new changes in the future, run:
 ```powershell
-# 1. Add all project files
 git add .
-
-# 2. Commit the initialized setup
-git commit -m "feat: bootstrap Covenant Odyssey workspace (Expo app, Workers backend, Zustand store)"
-
-# 3. Add your remote repository origin (replace with your actual GitHub URL)
-git remote add origin <your-github-repo-url>
-
-# 4. Push to main branch
-git branch -M main
-git push -u origin main
+git commit -m "Your commit message"
+git push
 ```
