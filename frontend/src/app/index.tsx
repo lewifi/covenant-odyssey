@@ -36,6 +36,7 @@ export default function CYOAScreen() {
   const loadProgress = useGameStore((state) => state.loadProgress);
 
   const isLargeScreen = width >= 768;
+  const [hoveredChoiceId, setHoveredChoiceId] = React.useState<string | null>(null);
 
   // Render alignment pill/badge
   const renderAlignmentMeters = () => (
@@ -122,8 +123,13 @@ export default function CYOAScreen() {
                 {choices.map((choice) => (
                   <TouchableOpacity
                     key={choice.id}
-                    style={styles.choiceButton}
+                    style={[
+                      styles.choiceButton,
+                      hoveredChoiceId === choice.id && styles.choiceButtonHovered
+                    ]}
                     onPress={() => makeChoice(choice)}
+                    onMouseEnter={() => setHoveredChoiceId(choice.id)}
+                    onMouseLeave={() => setHoveredChoiceId(null)}
                   >
                     <View style={styles.choiceInner}>
                       <Text style={styles.choiceText}>{choice.text}</Text>
@@ -222,7 +228,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#3F3F54',
   },
   ttsButtonActive: {
@@ -239,7 +245,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#3F3F54',
   },
   resetButtonText: {
@@ -252,7 +258,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#3F3F54',
   },
   loadButtonText: {
@@ -276,8 +282,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 120,
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 2,
+    borderColor: '#3F3F54',
   },
   alignmentLabel: {
     fontSize: 13,
@@ -312,8 +318,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     height: 320,
     backgroundColor: '#1E1E2A',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    borderColor: '#3F3F54',
   },
   artCardSplit: {
     flex: 1,
@@ -354,8 +360,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#171721',
     borderRadius: 0,
     padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    borderColor: '#3F3F54',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
@@ -389,8 +395,17 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     paddingVertical: 14,
     paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: '#303046',
+    borderWidth: 2,
+    borderColor: '#4A4A5A',
+  },
+  choiceButtonHovered: {
+    borderColor: '#D4AF37',
+    backgroundColor: '#322E22',
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 5,
   },
   choiceInner: {
     flexDirection: 'row',
