@@ -59,8 +59,12 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
 - **UI Shape Constraints**:
   - **Zero Rounded Corners**: Absolutely no rounded corners are allowed anywhere (`border-radius: 0;` / `borderRadius: 0` strictly enforced).
   - **Square Elements**: All buttons, alignment cards, and containers must use absolute sharp square/rectangular shapes.
-- **Frame & Borders**:
+- **Frame, Borders & Colors**:
   - Heavy solid framing: Use thick solid borders (e.g., `2px` or `3px` solid borders) on cards and buttons.
-  - High contrast color palette: Raw charcoal background (`#0A0A0C`), solid fills (`#171721`), stark white text, and menacing accents (deep crimson `#C53030`, heavy gold `#856A1E`). No soft drop shadows or ambient glows.
+  - Color Palette: Raw charcoal background (`#0A0A0C`), stark white text, dirt/charcoal brown accents (`#4E3F35`), and heavy gold highlights (`#856A1E` / `#D4AF37`) for attention.
+  - **No Solid Red**: Red is banned as it looks cheap.
+  - **Background Opacity**: Layered background cards, boxes, and buttons may use `75%` opacity (e.g., `rgba(23, 23, 33, 0.75)` or charcoal brown with opacity) to add premium visual depth.
+- **Interactive Micro-animations**:
+  - **Golden Pulse Hovers**: All interactive choice buttons, selectable options, and key hovered artwork cards must animate with a smooth, pulsing golden glow (`@keyframes goldGlowPulse`) to guide player focus and look highly premium.
 
 Last Updated: July 14, 2026

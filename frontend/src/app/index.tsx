@@ -41,16 +41,16 @@ export default function CYOAScreen() {
   // Render alignment pill/badge
   const renderAlignmentMeters = () => (
     <View style={styles.alignmentContainer}>
-      <View style={[styles.alignmentPill, { backgroundColor: '#1A3038' }]}>
+      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(26, 48, 56, 0.75)' }]}>
         <Text style={[styles.alignmentLabel, { color: '#68D391' }]}>🕊️ Righteous</Text>
         <Text style={styles.alignmentVal}>{righteous}</Text>
       </View>
-      <View style={[styles.alignmentPill, { backgroundColor: '#2D281E' }]}>
-        <Text style={[styles.alignmentLabel, { color: '#F6AD55' }]}>🛡️ Pragmatic</Text>
+      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(84, 67, 56, 0.75)' }]}>
+        <Text style={[styles.alignmentLabel, { color: '#D4AF37' }]}>🛡️ Pragmatic</Text>
         <Text style={styles.alignmentVal}>{pragmatic}</Text>
       </View>
-      <View style={[styles.alignmentPill, { backgroundColor: '#321D1D' }]}>
-        <Text style={[styles.alignmentLabel, { color: '#FC8181' }]}>⚔️ Rebel</Text>
+      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(62, 49, 41, 0.75)' }]}>
+        <Text style={[styles.alignmentLabel, { color: '#C0C0C0' }]}>⚔️ Rebel</Text>
         <Text style={styles.alignmentVal}>{rebel}</Text>
       </View>
     </View>
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   ttsButton: {
-    backgroundColor: '#2A2A38',
+    backgroundColor: 'rgba(84, 67, 56, 0.75)',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   ttsButtonActive: {
     borderColor: '#D4AF37',
-    backgroundColor: '#322E22',
+    backgroundColor: 'rgba(133, 106, 30, 0.75)',
   },
   ttsButtonText: {
     color: '#E2E2E9',
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   resetButton: {
-    backgroundColor: '#2A2A38',
+    backgroundColor: 'rgba(84, 67, 56, 0.75)',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   loadButton: {
-    backgroundColor: '#2A2A38',
+    backgroundColor: 'rgba(84, 67, 56, 0.75)',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 0,
@@ -357,13 +357,11 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   narrativeCard: {
-    backgroundColor: '#171721',
+    backgroundColor: 'rgba(23, 23, 33, 0.75)',
     borderRadius: 0,
     padding: 24,
     borderWidth: 2,
     borderColor: '#3F3F54',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
   },
@@ -391,7 +389,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   choiceButton: {
-    backgroundColor: '#232333',
+    backgroundColor: 'rgba(35, 35, 51, 0.75)',
     borderRadius: 0,
     paddingVertical: 14,
     paddingHorizontal: 18,
@@ -400,7 +398,7 @@ const styles = StyleSheet.create({
   },
   choiceButtonHovered: {
     borderColor: '#D4AF37',
-    backgroundColor: '#322E22',
+    backgroundColor: 'rgba(84, 67, 56, 0.75)',
     shadowColor: '#D4AF37',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,

@@ -81,7 +81,7 @@
     @keyframes panelGlowPulse {
       0% {
         box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 8px 8px 0px rgba(0, 0, 0, 1);
-        border-color: #FF3333;
+        border-color: #544338;
       }
       50% {
         box-shadow: 0 0 25px rgba(212, 175, 55, 0.6), 8px 8px 0px rgba(0, 0, 0, 1);
@@ -89,7 +89,7 @@
       }
       100% {
         box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 8px 8px 0px rgba(0, 0, 0, 1);
-        border-color: #FF3333;
+        border-color: #544338;
       }
     }
 
@@ -98,15 +98,17 @@
       animation: goldGlowPulse 2s infinite ease-in-out;
     }
 
-    /* Brutalist Solid Overlay Panel */
+    /* Brutalist Solid Overlay Panel with 75% Opacity */
     .overlay-panel {
       position: absolute;
       bottom: 40px;
       z-index: 3;
-      background: #111115;
+      background: rgba(17, 17, 21, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       padding: 16px 28px;
       border-radius: 0;
-      border: 3px solid #FF3333;
+      border: 3px solid #544338;
       box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
       text-align: center;
       animation: fadeInUp 0.5s ease-out;
@@ -131,7 +133,7 @@
       font-size: 0.9rem;
       font-weight: 700;
       text-transform: uppercase;
-      color: #FF3333;
+      color: #D4AF37;
       margin-top: 6px;
       letter-spacing: 2px;
     }
