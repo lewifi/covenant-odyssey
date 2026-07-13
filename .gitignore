@@ -40,3 +40,6 @@ worker-configuration.d.ts
 
 # Assets folder
 **/Assets/
+
+# Temporary web folder
+temp-web/
