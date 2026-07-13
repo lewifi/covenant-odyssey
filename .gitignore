@@ -1,6 +1,15 @@
 # Local files
 .DS_Store
+Thumbs.db
 *.log
+
+# IDEs
+.vscode/
+
+# Environment Secrets
+.env
+.env*.local
+*.local
 
 # Node
 node_modules/
@@ -12,10 +21,16 @@ yarn-error.log*
 .gemini/
 .agents/
 
+# Test coverage
+coverage/
+
 # Expo / React Native
 .expo/
 web-build/
 dist/
+
+# TypeScript Caches
+*.tsbuildinfo
 
 # Cloudflare Wrangler local states
 .wrangler/
