@@ -22,3 +22,6 @@ dist/
 .dev.vars
 dist/
 worker-configuration.d.ts
+
+# Assets folder
+**/Assets/

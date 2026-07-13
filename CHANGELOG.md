@@ -13,4 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created `CHANGELOG.md` to track repository progression.
 - Configured repository setup to ignore iOS builds and tests for now.
 - Updated `IDEA.md` with detailed Add-on Story Arcs (Genesis, Exodus & Conquest, Kingdoms & Prophets, Exile & Return, Fulfillment).
+- Configured git to ignore the `Assets` folder and untracked it from the repository.
+
 
