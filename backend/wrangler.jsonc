@@ -19,6 +19,13 @@
 	"routes": [
 		{ "pattern": "covenantodyssey.lewihirvela.com", "custom_domain": true }
 	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "covenant-odyssey-db",
+			"database_id": "93fc7b29-a60e-42af-a89c-da9225c499e9"
+		}
+	],
 	"observability": {
 		"enabled": true
 	},

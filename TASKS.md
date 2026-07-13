@@ -17,9 +17,9 @@
 - [x] Connect Zustand frontend store to fetch real scenes dynamically from backend Worker
 
 ## Phase 2: Save System & State Persistence (Cloudflare D1)
-- [ ] Design migration schemas for saving/loading states in D1 database
-- [ ] Create `/api/save` and `/api/load` routes in backend Worker
-- [ ] Implement game save state syncing in frontend application
+- [x] Design migration schemas for saving/loading states in D1 database
+- [x] Create `/api/save` and `/api/load` routes in backend Worker
+- [x] Implement game save state syncing in frontend application
 
 ## Phase 3: Text-to-Speech (Gemini TTS) & SFX
 - [ ] Implement Worker routing for speech synthesis via Gemini TTS

@@ -4,6 +4,7 @@ export interface Env {
 	GEMINI_IMAGE_API_KEY: string;
 	OPENAI_API_KEY?: string;
 	ASSETS: Fetcher;
+	DB: D1Database;
 }
 
 const SYSTEM_PROMPT = `
@@ -191,6 +192,103 @@ Please generate the next scene continuing the narrative from the last action in 
 			} catch (error: any) {
 				return new Response(
 					JSON.stringify({ error: error.message || "An unexpected error occurred" }),
+					{
+						status: 500,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders(origin)
+						}
+					}
+				);
+			}
+		}
+
+		if (url.pathname === "/api/save" && request.method === "POST") {
+			try {
+				const body = await request.json() as {
+					userId: string;
+					sceneId: string;
+					history: string[];
+					righteous: number;
+					pragmatic: number;
+					rebel: number;
+				};
+
+				await env.DB.prepare(
+					"INSERT OR REPLACE INTO saves (user_id, scene_id, history, righteous_score, pragmatic_score, rebel_score, last_updated) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)"
+				)
+				.bind(body.userId, body.sceneId, JSON.stringify(body.history), body.righteous, body.pragmatic, body.rebel)
+				.run();
+
+				return new Response(JSON.stringify({ success: true }), {
+					headers: {
+						"Content-Type": "application/json",
+						...corsHeaders(origin)
+					}
+				});
+			} catch (error: any) {
+				return new Response(
+					JSON.stringify({ error: error.message || "Failed to save progress" }),
+					{
+						status: 500,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders(origin)
+						}
+					}
+				);
+			}
+		}
+
+		if (url.pathname === "/api/load" && request.method === "GET") {
+			try {
+				const userId = url.searchParams.get("userId");
+				if (!userId) {
+					return new Response(JSON.stringify({ error: "Missing userId parameter" }), {
+						status: 400,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders(origin)
+						}
+					});
+				}
+
+				const saveState = await env.DB.prepare(
+					"SELECT * FROM saves WHERE user_id = ?"
+				)
+				.bind(userId)
+				.first();
+
+				if (!saveState) {
+					return new Response(JSON.stringify({ error: "No save state found for this user" }), {
+						status: 404,
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders(origin)
+						}
+					});
+				}
+
+				return new Response(
+					JSON.stringify({
+						userId: saveState.user_id,
+						sceneId: saveState.scene_id,
+						history: JSON.parse(saveState.history as string),
+						righteous: saveState.righteous_score,
+						pragmatic: saveState.pragmatic_score,
+						rebel: saveState.rebel_score,
+						lastUpdated: saveState.last_updated
+					}),
+					{
+						headers: {
+							"Content-Type": "application/json",
+							...corsHeaders(origin)
+						}
+					}
+				);
+			} catch (error: any) {
+				return new Response(
+					JSON.stringify({ error: error.message || "Failed to load progress" }),
 					{
 						status: 500,
 						headers: {

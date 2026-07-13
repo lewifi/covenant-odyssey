@@ -12,6 +12,7 @@ export interface Choice {
 }
 
 export interface GameState {
+  userId: string;
   sceneId: string;
   sceneTitle: string;
   sceneText: string;
@@ -27,7 +28,9 @@ export interface GameState {
   adGateTriggered: boolean;
 
   // Actions
-  makeChoice: (choice: Choice) => void;
+  makeChoice: (choice: Choice) => Promise<void>;
+  saveProgress: () => Promise<void>;
+  loadProgress: () => Promise<void>;
   setTtsEnabled: (enabled: boolean) => void;
   unlockPremium: () => void;
   resetGame: () => void;
@@ -63,6 +66,7 @@ const INITIAL_SCENE = {
 };
 
 export const useGameStore = create<GameState>((set) => ({
+  userId: 'eliab_dev_user',
   ...INITIAL_SCENE,
   history: [],
   righteous: 0,
@@ -130,6 +134,9 @@ export const useGameStore = create<GameState>((set) => ({
         rebel: nextRebel,
         isLoading: false,
       });
+
+      // Sync state to D1 Database in the background
+      useGameStore.getState().saveProgress().catch(err => console.error("Auto-save failed:", err));
 
     } catch (error) {
       console.warn("Worker API error, using local fallback content:", error);
@@ -237,6 +244,92 @@ export const useGameStore = create<GameState>((set) => ({
         rebel: nextRebel,
         isLoading: false,
       });
+
+      // Sync state to D1 Database in the background
+      useGameStore.getState().saveProgress().catch(err => console.error("Auto-save failed:", err));
+    }
+  },
+
+  saveProgress: async () => {
+    const { userId, sceneId, history, righteous, pragmatic, rebel } = useGameStore.getState();
+    try {
+      const response = await fetch('http://localhost:8787/api/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          sceneId,
+          history,
+          righteous,
+          pragmatic,
+          rebel,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to save state. Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.warn("D1 save failed:", error);
+    }
+  },
+
+  loadProgress: async () => {
+    const { userId } = useGameStore.getState();
+    useGameStore.setState({ isLoading: true });
+    try {
+      const response = await fetch(`http://localhost:8787/api/load?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load state. Status: ${response.status}`);
+      }
+      const data = await response.json() as {
+        sceneId: string;
+        history: string[];
+        righteous: number;
+        pragmatic: number;
+        rebel: number;
+      };
+
+      const sceneResponse = await fetch('http://localhost:8787/api/generate-scene', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sceneId: data.sceneId,
+          history: data.history,
+          righteous: data.righteous,
+          pragmatic: data.pragmatic,
+          rebel: data.rebel,
+        }),
+      });
+
+      if (!sceneResponse.ok) {
+        throw new Error(`Failed to generate loaded scene. Status: ${sceneResponse.status}`);
+      }
+
+      const sceneData = await sceneResponse.json() as {
+        sceneTitle: string;
+        sceneText: string;
+        choices: Choice[];
+      };
+
+      useGameStore.setState({
+        sceneId: data.sceneId,
+        sceneTitle: sceneData.sceneTitle,
+        sceneText: sceneData.sceneText,
+        choices: sceneData.choices,
+        history: data.history,
+        righteous: data.righteous,
+        pragmatic: data.pragmatic,
+        rebel: data.rebel,
+        isLoading: false,
+      });
+
+    } catch (error) {
+      console.warn("D1 load failed:", error);
+      useGameStore.setState({ isLoading: false });
     }
   },
 

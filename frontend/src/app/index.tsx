@@ -33,6 +33,7 @@ export default function CYOAScreen() {
   const setTtsEnabled = useGameStore((state) => state.setTtsEnabled);
   const unlockPremium = useGameStore((state) => state.unlockPremium);
   const resetGame = useGameStore((state) => state.resetGame);
+  const loadProgress = useGameStore((state) => state.loadProgress);
 
   const isLargeScreen = width >= 768;
 
@@ -59,6 +60,11 @@ export default function CYOAScreen() {
       colors={['#0F0F12', '#171721', '#09090C']}
       style={styles.container}
     >
+      {Platform.OS === 'web' && (
+        <style dangerouslySetInnerHTML={{__html: `
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        `}} />
+      )}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Top Header */}
         <View style={styles.header}>
@@ -72,6 +78,9 @@ export default function CYOAScreen() {
               onPress={() => setTtsEnabled(!ttsEnabled)}
             >
               <Text style={styles.ttsButtonText}>{ttsEnabled ? '🔊 Narration: On' : '🔇 Narration: Off'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.loadButton} onPress={loadProgress}>
+              <Text style={styles.loadButtonText}>📂 Load Save</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.resetButton} onPress={resetGame}>
               <Text style={styles.resetButtonText}>🔄 Reset</Text>
@@ -194,12 +203,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#D4AF37',
     letterSpacing: 2,
-    fontFamily: Platform.OS === 'web' ? 'Spline Sans, sans-serif' : 'serif',
+    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
   },
   subtitle: {
-    fontSize: 12,
-    color: '#8A8A9E',
-    fontWeight: '600',
+    fontSize: 14,
+    color: '#A0A0B0',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   headerControls: {
     flexDirection: 'row',
@@ -209,7 +221,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2A2A38',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#3F3F54',
   },
@@ -226,11 +238,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#2A2A38',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 0,
     borderWidth: 1,
     borderColor: '#3F3F54',
   },
   resetButtonText: {
+    color: '#E2E2E9',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  loadButton: {
+    backgroundColor: '#2A2A38',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 0,
+    borderWidth: 1,
+    borderColor: '#3F3F54',
+  },
+  loadButtonText: {
     color: '#E2E2E9',
     fontSize: 12,
     fontWeight: '600',
@@ -247,7 +272,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 0,
     flex: 1,
     minWidth: 120,
     justifyContent: 'space-between',
@@ -257,11 +282,13 @@ const styles = StyleSheet.create({
   alignmentLabel: {
     fontSize: 13,
     fontWeight: '700',
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   alignmentVal: {
     color: '#FFF',
     fontSize: 14,
     fontWeight: '800',
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   loaderContainer: {
     alignItems: 'center',
@@ -281,7 +308,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   artCard: {
-    borderRadius: 16,
+    borderRadius: 0,
     overflow: 'hidden',
     height: 320,
     backgroundColor: '#1E1E2A',
@@ -307,6 +334,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
+    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
   },
   artDivider: {
     height: 2,
@@ -320,10 +348,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1,
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   narrativeCard: {
     backgroundColor: '#171721',
-    borderRadius: 16,
+    borderRadius: 0,
     padding: 24,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.05)',
@@ -342,20 +371,22 @@ const styles = StyleSheet.create({
     color: '#FFF',
     marginBottom: 16,
     letterSpacing: 0.5,
+    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
   },
   sceneText: {
     fontSize: 16,
     color: '#D1D1E0',
     lineHeight: 28,
-    fontWeight: '450',
+    fontWeight: '400',
     marginBottom: 24,
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   choicesContainer: {
     gap: 12,
   },
   choiceButton: {
     backgroundColor: '#232333',
-    borderRadius: 12,
+    borderRadius: 0,
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderWidth: 1,
@@ -374,6 +405,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
     lineHeight: 22,
+    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
   choiceEffectBadge: {
     fontSize: 11,
@@ -382,7 +414,7 @@ const styles = StyleSheet.create({
     color: '#D4AF37',
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 6,
+    borderRadius: 0,
     overflow: 'hidden',
   },
   paywallOverlay: {
@@ -395,7 +427,7 @@ const styles = StyleSheet.create({
   paywallCard: {
     width: '100%',
     maxWidth: 480,
-    borderRadius: 20,
+    borderRadius: 0,
     padding: 32,
     alignItems: 'center',
     borderWidth: 1,
@@ -420,7 +452,7 @@ const styles = StyleSheet.create({
   },
   premiumCTA: {
     width: '100%',
-    borderRadius: 10,
+    borderRadius: 0,
     overflow: 'hidden',
     marginBottom: 12,
   },
@@ -437,7 +469,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#232333',
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: 0,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#303046',

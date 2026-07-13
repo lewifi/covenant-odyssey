@@ -48,4 +48,14 @@ Use Claude for critical code and story coherence. Use Gemini for cost-effective 
 
 API keys are separated between the Story generation engine (`GEMINI_STORY_API_KEY`), the Audio TTS generation engine (`GEMINI_TTS_API_KEY`), and the Image generation engine (`GEMINI_IMAGE_API_KEY`) for granular usage tracking.
 
+## Design Guidelines & Styling Constants
+
+- **Typography & Font Pairings**:
+  - Headings / Logos / Titles: `'Playfair Display', serif`
+  - Subheadings / Paragraphs / Body Text / Buttons: `'Outfit', sans-serif`
+  - Subheadings format: Slightly larger, bold, and in all caps (`text-transform: uppercase`).
+- **UI Shape Constraints**:
+  - **No Pills**: Capsule/pill layouts (e.g., border-radius 20px+) are strictly banned.
+  - **Square Buttons**: All buttons, alignments cards, and containers must use square/rectangular shapes (border-radius of `4px` or `0px` maximum).
+
 Last Updated: July 14, 2026
