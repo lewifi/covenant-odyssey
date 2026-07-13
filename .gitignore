@@ -1,0 +1,24 @@
+# Local files
+.DS_Store
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Gemini IDE files
+.gemini/
+.agents/
+
+# Expo / React Native
+.expo/
+web-build/
+dist/
+
+# Cloudflare Wrangler local states
+.wrangler/
+.dev.vars
+dist/
+worker-configuration.d.ts
