@@ -12,7 +12,7 @@
 - [x] Set up Git & push to GitHub
 
 ## Phase 1: Gemini AI Story Generation Engine
-- [ ] Bind `GEMINI_API_KEY` to the Worker backend locally and in production env
+- [/] Bind `GEMINI_API_KEY` to the Worker backend locally and in production env (local .dev.vars template created)
 - [ ] Implement Worker endpoint `/api/generate-scene` to handle structured prompts and return JSON scenes
 - [ ] Connect Zustand frontend store to fetch real scenes dynamically from backend Worker
 
