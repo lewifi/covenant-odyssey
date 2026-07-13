@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented the Gemini AI Story Generation Engine (Phase 1): created `/api/generate-scene` endpoint with OpenAI fallback inside backend Worker, and connected it to the frontend Zustand store with local mock fallbacks.
 - Created a temporary web preview workspace in `temp-web/` containing static page preview for Kingdoms & Prophets theme, and added it to root `.gitignore`.
 - Configured Cloudflare Worker static assets and custom domain routing for `covenantodyssey.lewihirvela.com`, copied Kingdoms & Prophets theme page to public assets, and successfully deployed to Cloudflare.
+- Implemented the Cloudflare D1 database save persistence (Phase 2): created database schema migrations, added `/api/save` and `/api/load` routes in the backend Worker, and added save/load state syncing in the frontend Zustand store.
+- Implemented menacing, unfriendly brutalist design guidelines: flattened all border-radius styles to 0 (no rounded corners), removed white borders, added heavy 2px/4px border stylings, set custom typography pairings (Playfair Display, Outfit, Courier New monospace), and integrated custom golden hover animations on choice options.
+
 
 
 
