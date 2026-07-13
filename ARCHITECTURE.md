@@ -46,4 +46,6 @@ Platforms: Expo (iOS/Android/Tablet), Web (desktop + mobile).
 
 Use Claude for critical code and story coherence. Use Gemini for cost-effective generation in production.
 
+API keys are separated between the Story generation engine (`GEMINI_STORY_API_KEY`), the Audio TTS generation engine (`GEMINI_TTS_API_KEY`), and the Image generation engine (`GEMINI_IMAGE_API_KEY`) for granular usage tracking.
+
 Last Updated: July 14, 2026
