@@ -13,8 +13,12 @@
 	],
 	"assets": {
 		// The path to the directory containing the `index.html` file to be served at `/`
-		"directory": "./public"
+		"directory": "./public",
+		"binding": "ASSETS"
 	},
+	"routes": [
+		{ "pattern": "covenantodyssey.lewihirvela.com", "custom_domain": true }
+	],
 	"observability": {
 		"enabled": true
 	},

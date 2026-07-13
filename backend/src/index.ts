@@ -3,6 +3,7 @@ export interface Env {
 	GEMINI_TTS_API_KEY: string;
 	GEMINI_IMAGE_API_KEY: string;
 	OPENAI_API_KEY?: string;
+	ASSETS: Fetcher;
 }
 
 const SYSTEM_PROMPT = `
@@ -201,12 +202,7 @@ Please generate the next scene continuing the narrative from the last action in 
 			}
 		}
 
-		return new Response(JSON.stringify({ error: "Not Found" }), {
-			status: 404,
-			headers: {
-				"Content-Type": "application/json",
-				...corsHeaders(origin)
-			}
-		});
+		// Fallback to static assets handler
+		return env.ASSETS.fetch(request);
 	},
 };
