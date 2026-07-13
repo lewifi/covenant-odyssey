@@ -35,4 +35,28 @@ These are separate generative modules that can be unlocked individually or as a 
 
 Users start with the Kingdoms & Prophets arc (your Eliab story). Other arcs are paid add-ons ($1.99–$3.99 each) or part of the Premium bundle. The generative engine can reference or blend arcs at convergence points for crossover playthroughs.
 
+## Assets & Visual Themes
+The project utilizes pre-configured assets and styling themes to maintain visual excellence:
+
+### 1. Visual Assets
+Located under `frontend/assets/`:
+- **Main Logos & Icons**: `images/icon.png` (application icon), `images/logo-glow.png` (high-fidelity glowing header variant), and `images/favicon.png`.
+- **Navigation Icons**: Stored under `images/tabIcons/` (`home.png`, `explore.png`) for tabbed navigation triggers.
+- **Support Graphics**: `images/react-logo.png` variants, `images/expo-logo.png`, `images/expo-badge.png` variants, and `images/tutorial-web.png`.
+- **Application Icon Structure**: Layered SVG elements (`expo-symbol 2.svg`) and grid overlays configured in `expo.icon/icon.json`.
+
+### 2. Styling Themes (Light & Dark Modes)
+Configured under `frontend/src/constants/theme.ts`:
+- **Light Theme**:
+  - Background: `#ffffff`
+  - Elements: `#F0F0F3`
+  - Selected states: `#E0E1E6`
+  - Text colors: Primary `#000000`, Secondary `#60646C`
+- **Dark Theme (Default Game Setting)**:
+  - Background: `#000000`
+  - Elements: `#212225`
+  - Selected states: `#2E3135`
+  - Text colors: Primary `#ffffff`, Secondary `#B0B4BA`
+- **Fonts Hierarchy**: Extends the display font Spline Sans and Inter for modern, high-contrast, premium typography.
+
 Last Updated: July 14, 2026
