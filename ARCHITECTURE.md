@@ -256,10 +256,11 @@ All content in both zones must be vertically centred within the shared window �
 ### Header Bar (Z-Layer 2)
 
 - **Left padding**: `48px` — matches the story text left padding. Logo brand and story text share the same left edge.
-- **Brand**: Logo image (`logo.png`, height `108px`) + tagline text ("DIVERGENT PROPHECIES") beside it. Never plain text for the logo. Never a smaller logo height.
+- **Brand**: Logo image (`logo.png` = `Covenant-Odyssey-Words.png`, height `108px`) + tagline text ("DIVERGENT PROPHECIES") beside it. Never plain text for the logo. Never a smaller logo height.
 - **Tagline**: Outfit, 12px, `rgba(212,175,55,0.7)`, `letter-spacing: 3px`, uppercase.
 - **Right**: Remix Icons line buttons — Save, Load, TTS toggle, Settings, Chapter badge. Courier New for badge label text only.
 - **Header height**: Currently `132px` (logo 108px + 12px top/bottom padding). If logo height changes, recalculate and update both zone `top` values.
+- **Shield asset** (`Covenant-Odyssey-Shield.png`): Reserved. Use for loading screens, splash cards, character card headers, or OG share images — not the game header.
 
 ---
 
