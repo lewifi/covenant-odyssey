@@ -94,6 +94,63 @@
       gap: 6px;
     }
 
+    /* ── Menu toggle (mobile only, hidden on desktop) ── */
+    #menu-btn {
+      display: none;
+      background: rgba(84, 67, 56, 0.85);
+      border: 2px solid #D4AF37;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      padding: 8px 9px;
+      transition: background 0.15s, box-shadow 0.2s;
+    }
+    #menu-btn:hover {
+      background: rgba(133,106,30,0.85);
+      box-shadow: 0 0 14px rgba(212,175,55,0.4);
+    }
+    /* Three bars — uneven widths like a cuneiform seal mark */
+    #menu-btn .bar {
+      display: block;
+      height: 2px;
+      background: #D4AF37;
+      transition: background 0.15s;
+    }
+    #menu-btn .bar-1 { width: 100%; margin-bottom: 5px; }
+    #menu-btn .bar-2 { width: 62%; margin-bottom: 5px; }
+    #menu-btn .bar-3 { width: 82%; }
+    #menu-btn.open .bar-1 { width: 82%; }
+    #menu-btn.open .bar-2 { width: 100%; }
+    #menu-btn.open .bar-3 { width: 62%; }
+
+    /* ── Mobile action panel (dropdown) ── */
+    #action-panel {
+      display: none;
+      position: fixed;
+      top: 76px;
+      right: 0;
+      background: rgba(10,10,12,0.95);
+      border: 2px solid #544338;
+      border-top: none;
+      border-right: none;
+      padding: 10px 12px;
+      z-index: 20;
+      flex-direction: row;
+      gap: 8px;
+      align-items: center;
+      transform: translateY(-8px);
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    #action-panel.open {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .header-btn {
       background: rgba(84, 67, 56, 0.75);
       border: 2px solid #3F3F54;
@@ -414,14 +471,85 @@
       animation: choiceSelect 0.6s ease forwards;
     }
 
-    /* Mobile */
+    /* ── Mobile: stacking layout (max-width: 768px) ── */
     @media (max-width: 768px) {
-      #story-zone {
-        width: 90%;
-        bottom: 250px;
-        top: 55px;
+
+      /* Header: smaller logo, tighter padding */
+      #header {
+        padding: 10px 12px 10px 16px;
       }
-      .choice-btn { font-size: 12px; padding: 10px 12px; }
+      #header-brand { gap: 10px; }
+      #header-logo-img { height: 56px; }
+      #header-tagline { font-size: 9px; letter-spacing: 2px; }
+      #header-actions { gap: 4px; }
+      .header-btn { width: 32px; height: 32px; font-size: 16px; }
+      #chapter-badge { font-size: 10px; padding: 5px 8px; }
+
+      /* Gradient: full-width top+bottom fade to wrap both text zones */
+      #text-gradient {
+        width: 100%;
+        background: linear-gradient(
+          to bottom,
+          rgba(10,10,12,0.88) 0%,
+          rgba(10,10,12,0.55) 45%,
+          rgba(10,10,12,0.55) 55%,
+          rgba(10,10,12,0.88) 100%
+        );
+      }
+
+      /* Story zone: full width, top section */
+      #story-zone {
+        width: 100%;
+        left: 0;
+        top: 80px;
+        bottom: 190px;
+        padding: 0 20px;
+        justify-content: center;
+      }
+
+      /* Choices: full-width, stacked at bottom above stats */
+      #choices {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 48px;
+        height: auto;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: flex-start;
+        padding: 0 16px;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      /* Choice buttons: fit-content, no stagger on mobile */
+      .choice-btn {
+        font-size: 12px;
+        padding: 10px 12px;
+        max-width: 92vw;
+        transform: translateY(12px);
+      }
+      .choice-btn.revealed { transform: translateY(0); }
+      .choice-btn:nth-child(1),
+      .choice-btn:nth-child(2),
+      .choice-btn:nth-child(3) { margin-left: 0; }
+
+      /* Stats footer: stays centred at bottom */
+      #footer { padding: 8px 16px 12px; }
+
+      /* Tooltip for last stat: stay centred on mobile */
+      .alignment-stat:last-child::after {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+      }
+
+      /* Show seal-mark menu toggle, hide inline actions */
+      #menu-btn { display: flex; }
+      #header-actions { display: none; }
+
+      /* Show action panel when open */
+      #action-panel { display: flex; }
     }
   </style>
 </head>
@@ -439,6 +567,7 @@
       <img id="header-logo-img" src="logo.png" alt="Covenant Odyssey - Divergent Prophecies">
       <span id="header-tagline">Divergent Prophecies</span>
     </div>
+    <!-- Desktop: inline actions -->
     <div id="header-actions">
       <button class="header-btn" title="Save"><i class="ri-save-line"></i></button>
       <button class="header-btn" title="Load"><i class="ri-folder-open-line"></i></button>
@@ -446,7 +575,22 @@
       <button class="header-btn" title="Settings"><i class="ri-settings-3-line"></i></button>
       <div id="chapter-badge"><i class="ri-bookmark-line"></i> Ch. 1</div>
     </div>
+    <!-- Mobile: seal-mark toggle -->
+    <button id="menu-btn" title="Menu" aria-label="Open menu">
+      <span class="bar bar-1"></span>
+      <span class="bar bar-2"></span>
+      <span class="bar bar-3"></span>
+    </button>
   </header>
+
+  <!-- Mobile action panel (dropdown) -->
+  <div id="action-panel">
+    <button class="header-btn" title="Save"><i class="ri-save-line"></i></button>
+    <button class="header-btn" title="Load"><i class="ri-folder-open-line"></i></button>
+    <button class="header-btn tts-active" id="tts-btn-m" title="Toggle narration"><i class="ri-volume-up-line"></i></button>
+    <button class="header-btn" title="Settings"><i class="ri-settings-3-line"></i></button>
+    <div id="chapter-badge-m" style="background:rgba(10,10,12,0.75);border:2px solid #544338;padding:5px 10px;font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:#D4AF37;letter-spacing:1px;text-transform:uppercase;"><i class="ri-bookmark-line"></i> Ch. 1</div>
+  </div>
 
   <!-- Z-Layer 3: Story text zone -->
   <section id="story-zone">
@@ -561,6 +705,22 @@
       ttsOn = !ttsOn;
       document.getElementById('tts-icon').className = ttsOn ? 'ri-volume-up-line' : 'ri-volume-mute-line';
       ttsBtn.classList.toggle('tts-active', ttsOn);
+    });
+
+    // ── Mobile menu toggle ──
+    const menuBtn = document.getElementById('menu-btn');
+    const actionPanel = document.getElementById('action-panel');
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = menuBtn.classList.toggle('open');
+      actionPanel.classList.toggle('open', isOpen);
+    });
+    // Close when tapping outside
+    document.addEventListener('click', (e) => {
+      if (!menuBtn.contains(e.target) && !actionPanel.contains(e.target)) {
+        menuBtn.classList.remove('open');
+        actionPanel.classList.remove('open');
+      }
     });
   </script>
 </body>
