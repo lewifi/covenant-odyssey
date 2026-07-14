@@ -62,17 +62,29 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
+      padding: 10px 16px 10px 48px;
     }
 
-    #header-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      font-weight: 800;
-      color: #D4AF37;
-      letter-spacing: 2px;
+    #header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #header-logo-img {
+      height: 36px;
+      width: auto;
+      display: block;
+      filter: drop-shadow(0 0 8px rgba(212,175,55,0.35));
+    }
+
+    #header-tagline {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(212,175,55,0.7);
+      letter-spacing: 3px;
       text-transform: uppercase;
-      text-shadow: 0 0 20px rgba(212,175,55,0.3);
     }
 
     #header-actions {
@@ -262,47 +274,60 @@
       100% { background-position: -250% 0; }
     }
 
-    /* ── Z-Layer 4: Footer bar ── */
+    /* ── Z-Layer 4: Footer ── (stats only, bottom right) */
     #footer {
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0; right: 0;
       z-index: 10;
-      padding: 8px 16px 16px;
+      padding: 10px 20px 18px;
     }
 
+    /* ── Z-Layer 4: Choices ── (right 50%, spread vertically) */
     #choices {
+      position: fixed;
+      left: 52%;
+      right: 2%;
+      top: 15%;
+      bottom: 60px;
+      z-index: 10;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 8px;
-      max-width: 55%;
+      justify-content: space-around;
+      align-items: flex-start;
+      pointer-events: none;
     }
 
     .choice-btn {
       background: rgba(35, 35, 51, 0.75);
       border: 2px solid #4A4A5A;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 0;
       cursor: pointer;
+      pointer-events: all;
       color: #E2E2E9;
       font-family: 'Outfit', sans-serif;
       font-size: clamp(12px, 1.2vw, 14px);
       font-weight: 600;
       text-align: left;
-      display: flex;
-      justify-content: space-between;
+      display: inline-flex;
       align-items: center;
       gap: 12px;
-      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
       line-height: 1.4;
+      width: fit-content;
+      max-width: 42vw;
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateX(20px);
       transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, background 0.2s, box-shadow 0.3s;
     }
 
+    /* Stagger each choice with a slight left indent for visual rhythm */
+    .choice-btn:nth-child(1) { margin-left: 0; }
+    .choice-btn:nth-child(2) { margin-left: 24px; }
+    .choice-btn:nth-child(3) { margin-left: 12px; }
+
     .choice-btn.revealed {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0);
     }
 
     .choice-btn:hover {
@@ -325,10 +350,10 @@
       flex-shrink: 0;
     }
 
-    /* Alignment stats */
+    /* Alignment stats - bottom right */
     #alignment-row {
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       gap: 20px;
       padding-top: 4px;
     }
@@ -398,7 +423,10 @@
 
   <!-- Z-Layer 2: Header -->
   <header id="header">
-    <div id="header-logo">Covenant Odyssey</div>
+    <div id="header-brand">
+      <img id="header-logo-img" src="logo.png" alt="Covenant Odyssey - Divergent Prophecies">
+      <span id="header-tagline">Divergent Prophecies</span>
+    </div>
     <div id="header-actions">
       <button class="header-btn" title="Save"><i class="ri-save-line"></i></button>
       <button class="header-btn" title="Load"><i class="ri-folder-open-line"></i></button>
@@ -422,26 +450,28 @@
     </div>
   </section>
 
-  <!-- Z-Layer 4: Footer -->
+  <!-- Z-Layer 4: Choices - floating across right 50% -->
+  <div id="choices">
+    <button class="choice-btn" data-alignment="Righteous">
+      <span>Fall to the ground in reverence - "Speak, Lord. Your servant is listening."</span>
+      <span class="choice-badge">+Righteous</span>
+    </button>
+    <button class="choice-btn" data-alignment="Pragmatic">
+      <span>Step closer through the heat - "Why me, amid such lust, war, and betrayal?"</span>
+      <span class="choice-badge">+Pragmatic</span>
+    </button>
+    <button class="choice-btn" data-alignment="Rebel">
+      <span>Draw near boldly, heart pounding, recalling the passionate failings of the patriarchs.</span>
+      <span class="choice-badge">+Rebel</span>
+    </button>
+  </div>
+
+  <!-- Z-Layer 4: Footer - alignment stats only, bottom right -->
   <footer id="footer">
-    <div id="choices">
-      <button class="choice-btn" data-alignment="Righteous">
-        <span>Fall to the ground in reverence - "Speak, Lord. Your servant is listening."</span>
-        <span class="choice-badge">+Righteous</span>
-      </button>
-      <button class="choice-btn" data-alignment="Pragmatic">
-        <span>Step closer through the heat - "Why me, amid such lust, war, and betrayal?"</span>
-        <span class="choice-badge">+Pragmatic</span>
-      </button>
-      <button class="choice-btn" data-alignment="Rebel">
-        <span>Draw near boldly, heart pounding, recalling the passionate failings of the patriarchs.</span>
-        <span class="choice-badge">+Rebel</span>
-      </button>
-    </div>
     <div id="alignment-row">
-      <span class="alignment-stat" style="color:#68D391" id="stat-r" data-tooltip="Righteous — obedience to covenant, prophetic faith, divine will"><i class="ri-scales-3-line"></i> R:0</span>
-      <span class="alignment-stat" style="color:#D4AF37" id="stat-p" data-tooltip="Pragmatic — survival, strategy, ambition, human reason"><i class="ri-shield-line"></i> P:0</span>
-      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e" data-tooltip="Rebel — passion, defiance, flawed desire, chaos"><i class="ri-sword-line"></i> E:0</span>
+      <span class="alignment-stat" style="color:#68D391" id="stat-r" data-tooltip="Righteous - obedience to covenant, prophetic faith, divine will"><i class="ri-scales-3-line"></i> R:0</span>
+      <span class="alignment-stat" style="color:#D4AF37" id="stat-p" data-tooltip="Pragmatic - survival, strategy, ambition, human reason"><i class="ri-shield-line"></i> P:0</span>
+      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e" data-tooltip="Rebel - passion, defiance, flawed desire, chaos"><i class="ri-sword-line"></i> E:0</span>
     </div>
   </footer>
 
