@@ -62,7 +62,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 16px 10px 48px;
+      padding: 12px 16px 12px 48px;
     }
 
     #header-brand {
@@ -72,19 +72,20 @@
     }
 
     #header-logo-img {
-      height: 36px;
+      height: 108px;
       width: auto;
       display: block;
-      filter: drop-shadow(0 0 8px rgba(212,175,55,0.35));
+      filter: drop-shadow(0 0 12px rgba(212,175,55,0.4));
     }
 
     #header-tagline {
       font-family: 'Outfit', sans-serif;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       color: rgba(212,175,55,0.7);
       letter-spacing: 3px;
       text-transform: uppercase;
+      margin-top: 4px;
     }
 
     #header-actions {
@@ -132,12 +133,12 @@
       text-transform: uppercase;
     }
 
-    /* ── Z-Layer 3: Story text zone (left 50%, centered with padding) ── */
+    /* ── Z-Layer 3: Story text zone (left 50%, vertically 132px top to 60px from bottom) ── */
     #story-zone {
       position: fixed;
-      top: 60px;
+      top: 132px;
       left: 0;
-      bottom: 210px;
+      bottom: 60px;
       width: 50%;
       z-index: 3;
       display: flex;
@@ -282,12 +283,12 @@
       padding: 10px 20px 18px;
     }
 
-    /* ── Z-Layer 4: Choices ── (right 50%, spread vertically) */
+    /* ── Z-Layer 4: Choices ── (right 50%, same vertical bounds as story zone) */
     #choices {
       position: fixed;
       left: 52%;
       right: 2%;
-      top: 15%;
+      top: 132px;
       bottom: 60px;
       z-index: 10;
       display: flex;
