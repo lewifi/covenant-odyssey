@@ -108,7 +108,7 @@ AI-generated scene images must always be prompted with:
 
 ### Loading Screen
 - Moses burning bush image as full-bleed background
-- Centered Kingdoms & Prophets shield logo (400×342 PNG with transparency)
+- Centered Covenant Odyssey Divergent Phrophecies shield logo (400×342 PNG with transparency)
 - Gold activity spinner below logo
 
 ## Asset Size Rules
