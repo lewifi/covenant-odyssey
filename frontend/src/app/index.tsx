@@ -87,22 +87,22 @@ export default function GameScreen() {
       <Text style={styles.headerLogo}>COVENANT ODYSSEY</Text>
       <View style={styles.headerActions}>
         <TouchableOpacity style={styles.headerBtn} onPress={saveProgress}>
-          <Text style={styles.headerBtnText}>💾</Text>
+          <Text style={styles.headerBtnText}>SV</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerBtn} onPress={loadProgress}>
-          <Text style={styles.headerBtnText}>📂</Text>
+          <Text style={styles.headerBtnText}>LD</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.headerBtn, ttsEnabled && styles.headerBtnActive]}
           onPress={() => setTtsEnabled(!ttsEnabled)}
         >
-          <Text style={styles.headerBtnText}>{ttsEnabled ? '🔊' : '🔇'}</Text>
+          <Text style={styles.headerBtnText}>{ttsEnabled ? 'VOL' : 'MUT'}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerBtn}>
-          <Text style={styles.headerBtnText}>⚙</Text>
+          <Text style={styles.headerBtnText}>CFG</Text>
         </TouchableOpacity>
         <View style={styles.chapterBadge}>
-          <Text style={styles.chapterBadgeText}>⛪ Ch. {sceneId}</Text>
+          <Text style={styles.chapterBadgeText}>Ch. {sceneId}</Text>
         </View>
       </View>
     </View>
@@ -367,11 +367,11 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   headerLogo: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '800',
     color: '#D4AF37',
-    letterSpacing: 3,
-    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    letterSpacing: 2,
+    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
     textTransform: 'uppercase',
   },
   headerActions: {

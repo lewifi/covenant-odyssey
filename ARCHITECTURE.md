@@ -52,10 +52,10 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
 
 - **Visual Theme**: Menacing, unfriendly, and raw brutalist style.
 - **Typography & Font Pairings**:
-  - Headings / Logos / Titles: `'Playfair Display', serif` (monolithic, heavy classic serif)
-  - Subheadings / Paragraphs / Body Text / Buttons: `'Outfit', sans-serif` (stark, clean sans)
-  - Status Indicators / Labels: `'Courier New', monospace` (raw technical/terminal styling)
-  - Subheadings format: Slightly larger, bold, and in all caps (`text-transform: uppercase`).
+  - **Headings / Logos / Titles / Wordmarks**: `'Playfair Display', serif` — the game wordmark "COVENANT ODYSSEY" in headers, scene titles, and all prominent headings. Heavy, monolithic, classic serif.
+  - **Subheadings / Body / Buttons / Badges**: `'Outfit', sans-serif` — stark, clean. Used for choice buttons, paragraph text, nav labels.
+  - **Status / Labels / Technical readouts**: `'Courier New', monospace` — for alignment stats, chapter badges, system-level labels only. Never for logos or headings.
+  - Subheadings format: Bold, all caps (`text-transform: uppercase`), slightly larger than body.
 - **UI Shape Constraints**:
   - **Zero Rounded Corners**: Absolutely no rounded corners are allowed anywhere (`border-radius: 0;` / `borderRadius: 0` strictly enforced).
   - **Square Elements**: All buttons, alignment cards, and containers must use absolute sharp square/rectangular shapes.
@@ -66,10 +66,10 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
   - **Background Opacity**: Layered background cards, boxes, and buttons may use `75%` opacity (e.g., `rgba(23, 23, 33, 0.75)` or charcoal brown with opacity) to add premium visual depth.
 - **Interactive Micro-animations**:
   - **Golden Pulse Hovers**: All interactive choice buttons, selectable options, and key hovered artwork cards must animate with a smooth, pulsing golden glow (`@keyframes goldGlowPulse`) to guide player focus and look highly premium.
-- **Icons**:
-  - **BANNED**: Emojis are absolutely banned everywhere — in UI, code comments, documentation, prompts, and git commit messages. They are inconsistent across platforms, render poorly, and break the brutalist aesthetic.
-  - **Web**: Use **Remix Icons** (via CDN `https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css`) — line style only (no fill variants unless specified).
-  - **React Native / Expo**: Use **`@expo/vector-icons`** (Ionicons outline set) — `import { Ionicons } from '@expo/vector-icons'`.
+- **Icons — No Emojis**:
+  - **BANNED**: Emojis are absolutely banned everywhere — UI, code, comments, documentation, prompts, and git commit messages. They render inconsistently across platforms and break the brutalist aesthetic.
+  - **Web**: Use **Remix Icons** via CDN (`https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css`) — line style only (`ri-*-line` suffix, never `-fill`).
+  - **React Native / Expo**: Use **`@expo/vector-icons`** Ionicons outline variants — `import { Ionicons } from '@expo/vector-icons'`.
   - **Icon Map**: Save=`ri-save-line`, Load=`ri-folder-open-line`, TTS On=`ri-volume-up-line`, TTS Off=`ri-volume-mute-line`, Settings=`ri-settings-3-line`, Chapter=`ri-bookmark-line`, Righteous=`ri-scales-3-line`, Pragmatic=`ri-shield-line`, Rebel=`ri-sword-line`.
 
 ## Branding & Legal Constraints
@@ -98,8 +98,9 @@ The game screen uses a **z-stacked layer system** where AI-generated scene art f
 | 5 | Paywall / Ad gate overlay (when triggered) | Full dark overlay |
 
 ### Header Bar (Z-Layer 2)
-- Left: "COVENANT ODYSSEY" logo text (Courier New monospace, gold)
-- Right: Icon buttons — 💾 Save, 📂 Load, 🔊/🔇 TTS Mute Toggle, ⚙ Settings, ⛪ Chapter badge
+- Left: "COVENANT ODYSSEY" logo wordmark — **Playfair Display, serif, gold (`#D4AF37`), uppercase**. Never Courier New.
+- Right: Icon buttons (Remix Icons line set) — Save (`ri-save-line`), Load (`ri-folder-open-line`), TTS toggle (`ri-volume-up-line` / `ri-volume-mute-line`), Settings (`ri-settings-3-line`), Chapter badge (`ri-bookmark-line`)
+- Chapter badge text label: Courier New monospace (system/status label only)
 - TTS toggle is an immediate persistent mute — instantly stops all TTS API calls when off
 
 ### Art Composition Rules
@@ -108,8 +109,9 @@ AI-generated scene images must always be prompted with:
 - **Right ~60%**: Action-focus art (burning bush, battle, dramatic figure) as visual centerpiece
 
 ### Footer Bar (Z-Layer 4)
-- Choice buttons stacked vertically with 75% opacity brown backgrounds and golden hover pulse
-- Compact alignment stats row (🕊️ Righteous, 🛡️ Pragmatic, ⚔️ Rebel) beneath choices
+- Choice buttons: **Outfit, sans-serif** — stark, clean, easy to read under action pressure. Stacked vertically with 75% opacity brown backgrounds and golden hover pulse.
+- Choice alignment badge labels: Courier New monospace (system label)
+- Alignment stats row: Courier New monospace with Remix Icons — Righteous (`ri-scales-3-line`), Pragmatic (`ri-shield-line`), Rebel (`ri-sword-line`) beneath choices.
 
 ### Loading Screen
 - Moses burning bush image as full-bleed background
