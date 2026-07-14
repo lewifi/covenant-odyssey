@@ -170,13 +170,14 @@
 
     .header-btn {
       background: rgba(84, 67, 56, 0.75);
-      border: 2px solid #3F3F54;
+      border: none;
+      border-left: 3px solid #544338;
       padding: 6px 10px;
       font-size: 18px;
       cursor: pointer;
       color: #E2E2E9;
       border-radius: 0;
-      transition: border-color 0.15s, background 0.15s;
+      transition: border-left-color 0.15s, background 0.15s, color 0.15s;
       line-height: 1;
       display: flex;
       align-items: center;
@@ -185,19 +186,20 @@
       height: 36px;
     }
     .header-btn:hover {
-      border-color: #D4AF37;
+      border-left-color: #D4AF37;
       background: rgba(133, 106, 30, 0.75);
       color: #D4AF37;
     }
     .header-btn.tts-active {
-      border-color: #D4AF37;
+      border-left-color: #D4AF37;
       background: rgba(133, 106, 30, 0.75);
       color: #D4AF37;
     }
 
     #chapter-badge {
       background: rgba(10, 10, 12, 0.75);
-      border: 2px solid #544338;
+      border: none;
+      border-left: 3px solid #D4AF37;
       padding: 6px 12px;
       font-family: 'Courier New', monospace;
       font-size: 11px;
