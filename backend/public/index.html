@@ -167,9 +167,14 @@
       flex-shrink: 0;
     }
 
+    #story-inner {
+      display: flex;
+      flex-direction: column;
+      max-height: 100%;
+    }
+
     #scene-body {
       overflow-y: auto;
-      flex: 1;
       scrollbar-width: none;
     }
     #scene-body::-webkit-scrollbar { display: none; }
@@ -439,15 +444,17 @@
 
   <!-- Z-Layer 3: Story text zone -->
   <section id="story-zone">
-    <h1 id="scene-title">The Burning Bush</h1>
-    <div id="scene-divider"></div>
-    <div id="scene-body">
-      <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
-      <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
-      <span class="sentence" data-idx="2">Before you, the bush burns fiercely, tongues of flame wrapping the branches without consuming them.</span>
-      <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
-      <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
-      <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. <mark class="em">Choose how you will walk this path of fire and flesh.</mark>"</span>
+    <div id="story-inner">
+      <h1 id="scene-title">The Burning Bush</h1>
+      <div id="scene-divider"></div>
+      <div id="scene-body">
+        <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
+        <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
+        <span class="sentence" data-idx="2">Before you, the bush burns fiercely, tongues of flame wrapping the branches without consuming them.</span>
+        <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
+        <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
+        <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. <mark class="em">Choose how you will walk this path of fire and flesh.</mark>"</span>
+      </div>
     </div>
   </section>
 
