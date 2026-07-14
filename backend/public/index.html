@@ -280,10 +280,10 @@
       100% { background-position: -250% 0; }
     }
 
-    /* ── Z-Layer 4: Footer ── (stats only, bottom right) */
+    /* ── Z-Layer 4: Footer ── (stats, centred) */
     #footer {
       position: fixed;
-      bottom: 0; right: 0;
+      bottom: 0; left: 0; right: 0;
       z-index: 10;
       padding: 10px 20px 18px;
     }
@@ -356,10 +356,10 @@
       flex-shrink: 0;
     }
 
-    /* Alignment stats - bottom right */
+    /* Alignment stats - centred */
     #alignment-row {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 20px;
       padding-top: 4px;
     }
@@ -396,6 +396,12 @@
     }
     .alignment-stat:hover::after {
       opacity: 1;
+    }
+    /* Last stat tooltip opens leftward to avoid right-edge clip */
+    .alignment-stat:last-child::after {
+      left: auto;
+      right: 0;
+      transform: translateX(0);
     }
 
     /* Choice selection flash */

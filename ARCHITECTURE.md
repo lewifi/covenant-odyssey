@@ -198,34 +198,94 @@ Future addon packs follow the same pattern under the Covenant Odyssey universe (
 ### Legal
 - **BANNED PHRASE**: "Choose Your Own Adventure" (and the acronym CYOA) is a registered trademark and must NEVER appear anywhere in code, prompts, UI text, documentation, marketing, or metadata. Use "interactive branching narrative" or "divergent prophecies" instead.
 
-## UI Layout Architecture (Cinematic Full-Bleed)
+## UI Layout Architecture (Cinematic Full-Bleed) — LOCKED RULES
 
-The game screen uses a **z-stacked layer system** where AI-generated scene art fills the entire viewport, and all UI elements float on top:
+> **These are inviolable constraints, not guidelines. Any deviation is a regression and must be reverted.**
 
-| Z-Layer | Content | Background |
-|---------|---------|------------|
-| 0 (Base) | Full-bleed AI scene art (`<ImageBackground>`) | Solid image |
-| 1 | Left 50% gradient overlay for text readability | `rgba(10,10,12,0.75)` → transparent |
-| 2 | Header bar — logo text + action buttons | Transparent (buttons only have bg) |
-| 3 | Story text zone (left 40%) — title + narration | Transparent (text shadows only) |
-| 4 | Footer bar — choice buttons + alignment stats | Transparent (buttons at 75% opacity) |
-| 5 | Paywall / Ad gate overlay (when triggered) | Full dark overlay |
+The game screen uses a z-stacked layer system where AI-generated scene art fills the entire viewport and all UI floats above it. The screen is divided into a strict left/right split with a shared vertical window.
+
+---
+
+### Z-Layer Stack
+
+| Z | Layer | Content | Background |
+|---|-------|---------|------------|
+| 0 | Art | Full-bleed AI scene image, 100vw x 100vh | Solid image, `object-fit: cover` |
+| 1 | Gradient overlay | Left 50% dark-to-transparent gradient for text legibility | `rgba(10,10,12,0.75)` left to transparent right |
+| 2 | Header | Logo image + tagline (left), icon actions (right) | Transparent — buttons only have backgrounds |
+| 3 | Story zone | Scene title + narration sentences (left 50%) | Transparent — text shadows only |
+| 4 | Choices | 3 choice buttons floating over right 50% | Transparent — buttons at 75% opacity |
+| 4 | Stats footer | Alignment stat row (bottom right) | Transparent |
+| 50 | Paywall overlay | Full-screen gate (future) | Full dark overlay |
+
+---
+
+### Shared Vertical Window — NEVER BREAK THIS
+
+The story zone (left) and choices zone (right) **must share identical top and bottom bounds** at all times. This creates a single visual frame that spans the full screen height between the header and the stats row.
+
+```
+top:    [header height]px   -- currently 132px
+bottom: 60px
+```
+
+- **Story zone**: `position: fixed; top: 132px; bottom: 60px; left: 0; width: 50%`
+- **Choices zone**: `position: fixed; top: 132px; bottom: 60px; left: 52%; right: 2%`
+- If the header height changes, **both** values must update together.
+
+---
+
+### Vertical Centering — NEVER BREAK THIS
+
+All content in both zones must be vertically centred within the shared window — equal space at top and bottom regardless of content length.
+
+- **Story zone**: `display: flex; flex-direction: column; justify-content: center` on the zone. Content wrapped in `#story-inner` (natural height, no `flex: 1`). `#scene-body` has `overflow-y: auto` with no flex growth.
+- **Choices zone**: `display: flex; flex-direction: column; justify-content: space-around; align-items: flex-start`. Three choices distribute evenly across the full shared window height.
+- **Forbidden**: `flex: 1` on any content child inside these zones — it destroys centering by expanding to fill all space.
+
+---
+
+### Left/Right Horizontal Split — NEVER BREAK THIS
+
+- **Left 50%**: Story text zone exclusively. Padding: `0 40px 0 48px` (right clearance, left matches header brand alignment).
+- **Right 50%** (`left: 52%`): Choices zone exclusively. 2% right margin from edge.
+- The 2% gap between left and right zones is intentional — it prevents the zones from bleeding into each other.
+
+---
 
 ### Header Bar (Z-Layer 2)
-- Left: "COVENANT ODYSSEY" logo wordmark — **Playfair Display, serif, gold (`#D4AF37`), uppercase**. Never Courier New.
-- Right: Icon buttons (Remix Icons line set) — Save (`ri-save-line`), Load (`ri-folder-open-line`), TTS toggle (`ri-volume-up-line` / `ri-volume-mute-line`), Settings (`ri-settings-3-line`), Chapter badge (`ri-bookmark-line`)
-- Chapter badge text label: Courier New monospace (system/status label only)
-- TTS toggle is an immediate persistent mute — instantly stops all TTS API calls when off
+
+- **Left padding**: `48px` — matches the story text left padding. Logo brand and story text share the same left edge.
+- **Brand**: Logo image (`logo.png`, height `108px`) + tagline text ("DIVERGENT PROPHECIES") beside it. Never plain text for the logo. Never a smaller logo height.
+- **Tagline**: Outfit, 12px, `rgba(212,175,55,0.7)`, `letter-spacing: 3px`, uppercase.
+- **Right**: Remix Icons line buttons — Save, Load, TTS toggle, Settings, Chapter badge. Courier New for badge label text only.
+- **Header height**: Currently `132px` (logo 108px + 12px top/bottom padding). If logo height changes, recalculate and update both zone `top` values.
+
+---
+
+### Choices Zone (Z-Layer 4)
+
+- Choices are **not** in the footer. They are a separate `<div id="choices">` sibling element.
+- Three choice buttons, `justify-content: space-around` — evenly spread across the full shared vertical window.
+- Each button: `display: inline-flex; width: fit-content` — width is determined by text content only, never stretched to fill the container.
+- Stagger indent: `nth-child(1)` no indent, `nth-child(2)` 24px, `nth-child(3)` 12px.
+- Reveal animation: `translateX(20px)` → `translateX(0)` (slides in from right, not from below).
+- Pointer events: `#choices` has `pointer-events: none`; each `.choice-btn` restores `pointer-events: all`.
+
+---
+
+### Stats Footer (Z-Layer 4)
+
+- `position: fixed; bottom: 0; right: 0` — bottom right corner only.
+- Contains the alignment stat row only. No choice buttons.
+- Stats: Courier New, 11px. Tooltip on hover via `::after` pseudo-element with `data-tooltip` attribute.
+
+---
 
 ### Art Composition Rules
 AI-generated scene images must always be prompted with:
-- **Left ~40%**: Text-safe space (sky, landscape, muted tones, negative space) for text overlay
-- **Right ~60%**: Action-focus art (burning bush, battle, dramatic figure) as visual centerpiece
-
-### Footer Bar (Z-Layer 4)
-- Choice buttons: **Outfit, sans-serif** — stark, clean, easy to read under action pressure. Stacked vertically with 75% opacity brown backgrounds and golden hover pulse.
-- Choice alignment badge labels: Courier New monospace (system label)
-- Alignment stats row: Courier New monospace with Remix Icons — Righteous (`ri-scales-3-line`), Pragmatic (`ri-shield-line`), Rebel (`ri-sword-line`) beneath choices.
+- **Left ~50%**: Text-safe space (sky, landscape, muted tones, negative space) for text overlay
+- **Right ~50%**: Action-focus art (burning bush, battle, dramatic figure) as visual centrepiece
 
 ### Loading Screen
 - Moses burning bush image as full-bleed background
