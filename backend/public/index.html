@@ -80,7 +80,7 @@
 
     #header-tagline {
       font-family: 'Outfit', sans-serif;
-      font-size: 12px;
+      font-size: clamp(9px, 1.5vw, 12px);
       font-weight: 600;
       color: rgba(212,175,55,0.7);
       letter-spacing: 3px;
@@ -89,30 +89,27 @@
     }
 
     #header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      display: none;
     }
 
     /* ── Menu toggle (mobile only, hidden on desktop) ── */
     #menu-btn {
-      display: none;
-      background: rgba(84, 67, 56, 0.85);
-      border: 2px solid #D4AF37;
-      width: 40px;
-      height: 40px;
+      display: flex;
+      background: transparent;
+      border: none;
+      width: 36px;
+      height: 36px;
       cursor: pointer;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 0;
-      padding: 8px 9px;
-      transition: background 0.15s, box-shadow 0.2s;
+      padding: 6px 4px;
+      flex-shrink: 0;
+      margin-left: 16px;
+      transition: opacity 0.15s;
     }
-    #menu-btn:hover {
-      background: rgba(133,106,30,0.85);
-      box-shadow: 0 0 14px rgba(212,175,55,0.4);
-    }
+    #menu-btn:hover { opacity: 0.75; }
     /* Three bars — uneven widths like a cuneiform seal mark */
     #menu-btn .bar {
       display: block;
@@ -129,7 +126,6 @@
 
     /* ── Mobile action panel (dropdown) ── */
     #action-panel {
-      display: none;
       position: fixed;
       top: 76px;
       right: 0;
@@ -139,14 +135,17 @@
       border-right: none;
       padding: 10px 12px;
       z-index: 20;
+      display: flex;
       flex-direction: row;
       gap: 8px;
       align-items: center;
-      transform: translateY(-8px);
+      pointer-events: none;
       opacity: 0;
+      transform: translateY(-8px);
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
     #action-panel.open {
+      pointer-events: all;
       opacity: 1;
       transform: translateY(0);
     }
@@ -544,12 +543,8 @@
         transform: translateX(-50%);
       }
 
-      /* Show seal-mark menu toggle, hide inline actions */
-      #menu-btn { display: flex; }
-      #header-actions { display: none; }
-
       /* Show action panel when open */
-      #action-panel { display: flex; }
+      #action-panel { top: 76px; }
     }
   </style>
 </head>
