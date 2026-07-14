@@ -65,14 +65,30 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
 - **Tone baseline**: Tense and cautious — carries the weight of covenant consequences
 
 ### Mood Tag System
-Scene narration scripts are tagged with mood directives that influence delivery. Tags are inline with the script and stripped before display:
+Scene narration scripts include inline mood tags that shape the TTS delivery. Tags are stripped from display text before rendering.
+
+**Approach**: The AI narrator should derive mood tags organically from scene context - what is happening emotionally and dramatically drives the tag choice. The preferred palette below covers most scenes in the Kingdoms & Prophets arc, but the AI may use others where the scene genuinely calls for it (e.g., `[grief]`, `[reverence]`, `[seduction]`, `[despair]`, `[elation]`). Prefer specificity over falling back to a generic tag.
+
+**Preferred palette for Kingdoms & Prophets:**
 
 | Tag | Delivery instruction |
 |-----|---------------------|
-| `[aggression]` | Forceful, clipped — opens hard |
-| `[tension]` | Slower, breathier — builds dread |
+| `[aggression]` | Forceful, clipped - opens hard |
+| `[tension]` | Slower, breathier - builds dread |
 | `[agitation]` | Unsettled, slightly rushed |
 | `[determination]` | Firm, measured, inevitable |
+
+**Extended tags (use when scene context demands it):**
+
+| Tag | Delivery instruction |
+|-----|---------------------|
+| `[grief]` | Heavy, slowed - weight of loss |
+| `[reverence]` | Hushed, awed - sacred or divine encounter |
+| `[seduction]` | Low, drawn-out - warmth beneath danger |
+| `[despair]` | Flat, hollow - all hope gone |
+| `[elation]` | Lifted, bright - victory or divine favour |
+| `[menace]` | Cold, deliberate - threat beneath calm |
+| `[confusion]` | Fragmented, uncertain pacing |
 
 ### Reference Script — Scene 1: The Burning Bush
 ```
@@ -113,6 +129,11 @@ The voice rolls over you like thunder wrapped in mercy, echoing covenants made w
   - **Web**: Use **Remix Icons** via CDN (`https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css`) — line style only (`ri-*-line` suffix, never `-fill`).
   - **React Native / Expo**: Use **`@expo/vector-icons`** Ionicons outline variants — `import { Ionicons } from '@expo/vector-icons'`.
   - **Icon Map**: Save=`ri-save-line`, Load=`ri-folder-open-line`, TTS On=`ri-volume-up-line`, TTS Off=`ri-volume-mute-line`, Settings=`ri-settings-3-line`, Chapter=`ri-bookmark-line`, Righteous=`ri-scales-3-line`, Pragmatic=`ri-shield-line`, Rebel=`ri-sword-line`.
+- **Prose Punctuation**:
+  - **BANNED**: Em dashes (--) are banned from all UI text, story prose, documentation, and code strings. They are a typographic affectation that reads poorly in TTS and looks inconsistent.
+  - **Replacements**: Use a standard hyphen-dash ( - ) for asides, or a comma for natural pauses. Reserve the hyphen-dash for genuine breaks only.
+  - **Emphasis alternative**: For words or phrases that need visual weight beyond punctuation, wrap them in `<mark class="em">` (web) or a styled `<Text>` component (native). This applies a persistent gold shimmer that remains visible even during the TTS read-along shimmer pass.
+  - **Emphasis shimmer spec**: The `.em` class uses a static bright gold-to-white gradient with a slow `4s` sweep. It must not be overridden by the sentence `.current` TTS class. Implemented as a child `<mark>` so it sits above the sentence-level background-clip gradient.
 
 ## Branding & Legal Constraints
 
