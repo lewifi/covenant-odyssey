@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 2026-07-14
 
 ### Added
-- Created project vision in `IDEA.md` outlining the choose-your-own-adventure style game, mature biblical themes, and visual goals.
+- Created project vision in `IDEA.md` outlining the interactive branching narrative game, mature biblical themes, and visual goals.
 - Established primary tech stack in `ARCHITECTURE.md` including React, Expo, Zustand, Cloudflare Workers, D1 database, R2 storage, Claude (for architecture/oversight), and Gemini TTS.
 - Created `CHANGELOG.md` to track repository progression.
 - Configured repository setup to ignore iOS builds and tests for now.

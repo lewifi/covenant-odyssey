@@ -8,19 +8,22 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Platform,
+  ImageBackground,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, Choice } from '@/store/useGameStore';
-import { Colors } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 
-export default function CYOAScreen() {
-  const { width } = useWindowDimensions();
-  const theme = useTheme();
+const LOGO_IMAGE = require('@/../../assets/images/Kingdoms-and-Prophets-Logo-Transparent.png');
+const DEFAULT_BG = require('@/../../assets/images/Kingdoms-and-Prophets-Moses-Tree-Fire.jpg');
+
+export default function GameScreen() {
+  const { width, height } = useWindowDimensions();
 
   // Zustand Store Hooks
   const sceneTitle = useGameStore((state) => state.sceneTitle);
   const sceneText = useGameStore((state) => state.sceneText);
+  const sceneImage = useGameStore((state) => state.sceneImage);
   const choices = useGameStore((state) => state.choices);
   const righteous = useGameStore((state) => state.righteous);
   const pragmatic = useGameStore((state) => state.pragmatic);
@@ -28,137 +31,158 @@ export default function CYOAScreen() {
   const ttsEnabled = useGameStore((state) => state.ttsEnabled);
   const isLoading = useGameStore((state) => state.isLoading);
   const adGateTriggered = useGameStore((state) => state.adGateTriggered);
-  
+  const sceneId = useGameStore((state) => state.sceneId);
+
   const makeChoice = useGameStore((state) => state.makeChoice);
   const setTtsEnabled = useGameStore((state) => state.setTtsEnabled);
   const unlockPremium = useGameStore((state) => state.unlockPremium);
   const resetGame = useGameStore((state) => state.resetGame);
   const loadProgress = useGameStore((state) => state.loadProgress);
+  const saveProgress = useGameStore((state) => state.saveProgress);
 
-  const isLargeScreen = width >= 768;
   const [hoveredChoiceId, setHoveredChoiceId] = React.useState<string | null>(null);
 
-  // Render alignment pill/badge
-  const renderAlignmentMeters = () => (
-    <View style={styles.alignmentContainer}>
-      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(26, 48, 56, 0.75)' }]}>
-        <Text style={[styles.alignmentLabel, { color: '#68D391' }]}>🕊️ Righteous</Text>
-        <Text style={styles.alignmentVal}>{righteous}</Text>
+  // ─── HEADER BAR (Z-Layer 2) ───
+  const renderHeader = () => (
+    <View style={styles.headerBar}>
+      <Text style={styles.headerLogo}>COVENANT ODYSSEY</Text>
+      <View style={styles.headerActions}>
+        <TouchableOpacity style={styles.headerBtn} onPress={saveProgress}>
+          <Text style={styles.headerBtnText}>💾</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerBtn} onPress={loadProgress}>
+          <Text style={styles.headerBtnText}>📂</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.headerBtn, ttsEnabled && styles.headerBtnActive]}
+          onPress={() => setTtsEnabled(!ttsEnabled)}
+        >
+          <Text style={styles.headerBtnText}>{ttsEnabled ? '🔊' : '🔇'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerBtn}>
+          <Text style={styles.headerBtnText}>⚙</Text>
+        </TouchableOpacity>
+        <View style={styles.chapterBadge}>
+          <Text style={styles.chapterBadgeText}>⛪ Ch. {sceneId}</Text>
+        </View>
       </View>
-      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(84, 67, 56, 0.75)' }]}>
-        <Text style={[styles.alignmentLabel, { color: '#D4AF37' }]}>🛡️ Pragmatic</Text>
-        <Text style={styles.alignmentVal}>{pragmatic}</Text>
+    </View>
+  );
+
+  // ─── STORY TEXT ZONE (Z-Layer 3, left 40%) ───
+  const renderStoryText = () => (
+    <View style={styles.storyZone}>
+      <Text style={styles.storyTitle}>{sceneTitle}</Text>
+      <View style={styles.storyDivider} />
+      <ScrollView style={styles.storyScroll} showsVerticalScrollIndicator={false}>
+        <Text style={styles.storyBody}>{sceneText}</Text>
+      </ScrollView>
+    </View>
+  );
+
+  // ─── FOOTER BAR (Z-Layer 4) ───
+  const renderFooter = () => (
+    <View style={styles.footerBar}>
+      {/* Choice Buttons */}
+      <View style={styles.choicesContainer}>
+        {choices.map((choice) => (
+          <TouchableOpacity
+            key={choice.id}
+            style={[
+              styles.choiceButton,
+              hoveredChoiceId === choice.id && styles.choiceButtonHovered,
+            ]}
+            onPress={() => makeChoice(choice)}
+            onMouseEnter={() => setHoveredChoiceId(choice.id)}
+            onMouseLeave={() => setHoveredChoiceId(null)}
+          >
+            <View style={styles.choiceInner}>
+              <Text style={styles.choiceText}>{choice.text}</Text>
+              <View style={styles.choiceBadges}>
+                {choice.alignmentEffect.righteous ? (
+                  <Text style={styles.choiceEffectBadge}>+Righteous</Text>
+                ) : null}
+                {choice.alignmentEffect.pragmatic ? (
+                  <Text style={styles.choiceEffectBadge}>+Pragmatic</Text>
+                ) : null}
+                {choice.alignmentEffect.rebel ? (
+                  <Text style={styles.choiceEffectBadge}>+Rebel</Text>
+                ) : null}
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
       </View>
-      <View style={[styles.alignmentPill, { backgroundColor: 'rgba(62, 49, 41, 0.75)' }]}>
-        <Text style={[styles.alignmentLabel, { color: '#C0C0C0' }]}>⚔️ Rebel</Text>
-        <Text style={styles.alignmentVal}>{rebel}</Text>
+
+      {/* Alignment Stats Row */}
+      <View style={styles.alignmentRow}>
+        <View style={styles.alignmentStat}>
+          <Text style={[styles.alignmentLabel, { color: '#68D391' }]}>🕊️ R:{righteous}</Text>
+        </View>
+        <View style={styles.alignmentStat}>
+          <Text style={[styles.alignmentLabel, { color: '#D4AF37' }]}>🛡️ P:{pragmatic}</Text>
+        </View>
+        <View style={styles.alignmentStat}>
+          <Text style={[styles.alignmentLabel, { color: '#C0C0C0' }]}>⚔️ R:{rebel}</Text>
+        </View>
       </View>
     </View>
   );
 
   return (
-    <LinearGradient
-      colors={['#0F0F12', '#171721', '#09090C']}
-      style={styles.container}
-    >
+    <View style={styles.root}>
+      {/* Google Fonts Loader (Web) */}
       {Platform.OS === 'web' && (
         <style dangerouslySetInnerHTML={{__html: `
-          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&display=swap');
         `}} />
       )}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Top Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.logo}>COVENANT ODYSSEY</Text>
-            <Text style={styles.subtitle}>Choose Your Biblical Destiny</Text>
-          </View>
-          <View style={styles.headerControls}>
-            <TouchableOpacity
-              style={[styles.ttsButton, ttsEnabled && styles.ttsButtonActive]}
-              onPress={() => setTtsEnabled(!ttsEnabled)}
-            >
-              <Text style={styles.ttsButtonText}>{ttsEnabled ? '🔊 Narration: On' : '🔇 Narration: Off'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.loadButton} onPress={loadProgress}>
-              <Text style={styles.loadButtonText}>📂 Load Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.resetButton} onPress={resetGame}>
-              <Text style={styles.resetButtonText}>🔄 Reset</Text>
-            </TouchableOpacity>
-          </View>
+
+      {/* Z-Layer 0: Full-bleed scene art (or dark fallback) */}
+      <View style={styles.artLayer}>
+        <ImageBackground
+          source={sceneImage ? { uri: sceneImage } : DEFAULT_BG}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* Z-Layer 1: Left gradient overlay for text readability */}
+      <LinearGradient
+        colors={['rgba(10, 10, 12, 0.75)', 'rgba(10, 10, 12, 0.45)', 'transparent']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.textGradientOverlay}
+      />
+
+      {/* Z-Layer 2: Header Bar */}
+      {renderHeader()}
+
+      {/* Z-Layer 3 & 4: Content */}
+      {isLoading ? (
+        <View style={styles.loadingOverlay}>
+          <Image
+            source={LOGO_IMAGE}
+            style={styles.loadingLogo}
+            resizeMode="contain"
+          />
+          <ActivityIndicator size="large" color="#D4AF37" style={{ marginTop: 24 }} />
+          <Text style={styles.loadingText}>Weaving the tapestry of scripture...</Text>
         </View>
+      ) : (
+        <>
+          {/* Z-Layer 3: Story Text Zone */}
+          {renderStoryText()}
 
-        {/* Alignment Tracker */}
-        {renderAlignmentMeters()}
+          {/* Z-Layer 4: Footer Bar */}
+          {renderFooter()}
+        </>
+      )}
 
-        {isLoading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator size="large" color="#D4AF37" />
-            <Text style={styles.loaderText}>Weaving the tapestry of scripture...</Text>
-          </View>
-        ) : (
-          <View style={[styles.mainLayout, isLargeScreen && styles.mainLayoutSplit]}>
-            
-            {/* Left Column: Visual Artwork panel */}
-            <View style={[styles.artCard, isLargeScreen && styles.artCardSplit]}>
-              <LinearGradient
-                colors={['rgba(212, 175, 55, 0.15)', 'rgba(23, 23, 33, 0.85)']}
-                style={styles.artInner}
-              >
-                <Text style={styles.artPlaceholderIcon}>📜</Text>
-                <Text style={styles.artPlaceholderText}>{sceneTitle}</Text>
-                <View style={styles.artDivider} />
-                <Text style={styles.artHint}>Generative Scene Art</Text>
-              </LinearGradient>
-            </View>
-
-            {/* Right Column: Narrative & Choice Actions */}
-            <View style={[styles.narrativeCard, isLargeScreen && styles.narrativeCardSplit]}>
-              <Text style={styles.sceneTitle}>{sceneTitle}</Text>
-              <Text style={styles.sceneText}>{sceneText}</Text>
-
-              {/* Choices Rendering */}
-              <View style={styles.choicesContainer}>
-                {choices.map((choice) => (
-                  <TouchableOpacity
-                    key={choice.id}
-                    style={[
-                      styles.choiceButton,
-                      hoveredChoiceId === choice.id && styles.choiceButtonHovered
-                    ]}
-                    onPress={() => makeChoice(choice)}
-                    onMouseEnter={() => setHoveredChoiceId(choice.id)}
-                    onMouseLeave={() => setHoveredChoiceId(null)}
-                  >
-                    <View style={styles.choiceInner}>
-                      <Text style={styles.choiceText}>{choice.text}</Text>
-                      {choice.alignmentEffect.righteous && (
-                        <Text style={styles.choiceEffectBadge}>+Righteous</Text>
-                      )}
-                      {choice.alignmentEffect.pragmatic && (
-                        <Text style={styles.choiceEffectBadge}>+Pragmatic</Text>
-                      )}
-                      {choice.alignmentEffect.rebel && (
-                        <Text style={styles.choiceEffectBadge}>+Rebel</Text>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-          </View>
-        )}
-      </ScrollView>
-
-      {/* Ad Gate / Premium Paywall Overlay */}
+      {/* Z-Layer 5: Paywall / Ad Gate Overlay */}
       {adGateTriggered && (
         <View style={styles.paywallOverlay}>
-          <LinearGradient
-            colors={['#171721', '#0F0F12']}
-            style={styles.paywallCard}
-          >
+          <View style={styles.paywallCard}>
             <Text style={styles.paywallIcon}>👑</Text>
             <Text style={styles.paywallTitle}>Covenant Odyssey Premium</Text>
             <Text style={styles.paywallText}>
@@ -181,218 +205,157 @@ export default function CYOAScreen() {
             <TouchableOpacity style={styles.paywallReset} onPress={resetGame}>
               <Text style={styles.paywallResetText}>Restart Game</Text>
             </TouchableOpacity>
-          </LinearGradient>
+          </View>
         </View>
       )}
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  // ─── ROOT ───
+  root: {
     flex: 1,
+    backgroundColor: '#0A0A0C',
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 48,
+
+  // ─── Z-LAYER 0: ART BASE ───
+  artLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
   },
-  header: {
+
+  // ─── Z-LAYER 1: TEXT READABILITY GRADIENT ───
+  textGradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '50%',
+    zIndex: 1,
+  },
+
+  // ─── Z-LAYER 2: HEADER BAR ───
+  headerBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 20,
-    gap: 12,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'web' ? 12 : 48,
+    paddingBottom: 10,
   },
-  logo: {
-    fontSize: 22,
+  headerLogo: {
+    fontSize: 14,
     fontWeight: '800',
     color: '#D4AF37',
-    letterSpacing: 2,
-    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#A0A0B0',
-    fontWeight: '700',
+    letterSpacing: 3,
+    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
   },
-  headerControls: {
+  headerActions: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    gap: 6,
   },
-  ttsButton: {
+  headerBtn: {
     backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: 0,
     borderWidth: 2,
     borderColor: '#3F3F54',
   },
-  ttsButtonActive: {
+  headerBtnActive: {
     borderColor: '#D4AF37',
     backgroundColor: 'rgba(133, 106, 30, 0.75)',
   },
-  ttsButtonText: {
-    color: '#E2E2E9',
-    fontSize: 12,
-    fontWeight: '600',
+  headerBtnText: {
+    fontSize: 16,
   },
-  resetButton: {
-    backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    paddingVertical: 8,
+  chapterBadge: {
+    backgroundColor: 'rgba(10, 10, 12, 0.75)',
+    paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 0,
     borderWidth: 2,
-    borderColor: '#3F3F54',
+    borderColor: '#544338',
   },
-  resetButtonText: {
-    color: '#E2E2E9',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  loadButton: {
-    backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#3F3F54',
-  },
-  loadButtonText: {
-    color: '#E2E2E9',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  alignmentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 24,
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  alignmentPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 0,
-    flex: 1,
-    minWidth: 120,
-    justifyContent: 'space-between',
-    borderWidth: 2,
-    borderColor: '#3F3F54',
-  },
-  alignmentLabel: {
-    fontSize: 13,
+  chapterBadgeText: {
+    color: '#D4AF37',
+    fontSize: 11,
     fontWeight: '700',
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
+    letterSpacing: 1,
+    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    textTransform: 'uppercase',
   },
-  alignmentVal: {
-    color: '#FFF',
-    fontSize: 14,
+
+  // ─── Z-LAYER 3: STORY TEXT ZONE ───
+  storyZone: {
+    position: 'absolute',
+    top: Platform.OS === 'web' ? 60 : 100,
+    left: 16,
+    bottom: 220,
+    width: '38%',
+    zIndex: 3,
+    justifyContent: 'center',
+    paddingRight: 8,
+  },
+  storyTitle: {
+    fontSize: 28,
     fontWeight: '800',
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
+    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 8,
+    marginBottom: 8,
   },
-  loaderContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 64,
-  },
-  loaderText: {
-    color: '#8A8A9E',
-    marginTop: 16,
-    fontSize: 15,
-  },
-  mainLayout: {
-    gap: 20,
-  },
-  mainLayoutSplit: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  artCard: {
-    borderRadius: 0,
-    overflow: 'hidden',
-    height: 320,
-    backgroundColor: '#1E1E2A',
-    borderWidth: 2,
-    borderColor: '#3F3F54',
-  },
-  artCardSplit: {
-    flex: 1,
-    height: 480,
-  },
-  artInner: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  artPlaceholderIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  artPlaceholderText: {
-    color: '#E2E2E9',
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
-  },
-  artDivider: {
-    height: 2,
+  storyDivider: {
+    height: 3,
     width: 60,
     backgroundColor: '#D4AF37',
-    marginVertical: 16,
-  },
-  artHint: {
-    color: '#8A8A9E',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
-  },
-  narrativeCard: {
-    backgroundColor: 'rgba(23, 23, 33, 0.75)',
-    borderRadius: 0,
-    padding: 24,
-    borderWidth: 2,
-    borderColor: '#3F3F54',
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-  },
-  narrativeCardSplit: {
-    flex: 1.2,
-    minHeight: 480,
-  },
-  sceneTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#FFF',
     marginBottom: 16,
-    letterSpacing: 0.5,
-    fontFamily: Platform.OS === 'web' ? 'Playfair Display, serif' : 'serif',
   },
-  sceneText: {
+  storyScroll: {
+    flex: 1,
+  },
+  storyBody: {
     fontSize: 16,
-    color: '#D1D1E0',
+    color: '#E2E2E9',
     lineHeight: 28,
     fontWeight: '400',
-    marginBottom: 24,
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 6,
+  },
+
+  // ─── Z-LAYER 4: FOOTER BAR ───
+  footerBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    paddingHorizontal: 16,
+    paddingBottom: Platform.OS === 'web' ? 12 : 32,
+    paddingTop: 8,
   },
   choicesContainer: {
-    gap: 12,
+    gap: 8,
+    marginBottom: 8,
   },
   choiceButton: {
     backgroundColor: 'rgba(35, 35, 51, 0.75)',
     borderRadius: 0,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderWidth: 2,
     borderColor: '#4A4A5A',
   },
@@ -414,25 +377,71 @@ const styles = StyleSheet.create({
   },
   choiceText: {
     color: '#E2E2E9',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     flex: 1,
-    lineHeight: 22,
-    fontFamily: Platform.OS === 'web' ? 'Outfit, sans-serif' : 'sans-serif',
+    lineHeight: 20,
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
+  },
+  choiceBadges: {
+    flexDirection: 'row',
+    gap: 4,
   },
   choiceEffectBadge: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-    backgroundColor: 'rgba(212,175,55,0.15)',
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     color: '#D4AF37',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
     borderRadius: 0,
     overflow: 'hidden',
+    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    textTransform: 'uppercase',
   },
+
+  // ─── ALIGNMENT STATS ROW ───
+  alignmentRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    paddingTop: 4,
+  },
+  alignmentStat: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  alignmentLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    letterSpacing: 1,
+  },
+
+  // ─── LOADING OVERLAY ───
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 20,
+    backgroundColor: 'rgba(10, 10, 12, 0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingLogo: {
+    width: 200,
+    height: 200,
+  },
+  loadingText: {
+    color: '#8A8A9E',
+    marginTop: 16,
+    fontSize: 15,
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
+  },
+
+  // ─── Z-LAYER 5: PAYWALL OVERLAY ───
   paywallOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.85)',
+    zIndex: 50,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -443,8 +452,9 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     padding: 32,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: '#D4AF37',
+    backgroundColor: 'rgba(23, 23, 33, 0.95)',
   },
   paywallIcon: {
     fontSize: 48,
@@ -455,6 +465,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFF',
     marginBottom: 12,
+    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
   },
   paywallText: {
     fontSize: 14,
@@ -462,6 +473,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: 'center',
     marginBottom: 28,
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
   },
   premiumCTA: {
     width: '100%',
@@ -477,21 +489,23 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: '800',
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
   },
   adButton: {
     width: '100%',
-    backgroundColor: '#232333',
+    backgroundColor: 'rgba(84, 67, 56, 0.75)',
     paddingVertical: 14,
     borderRadius: 0,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#303046',
+    borderWidth: 2,
+    borderColor: '#544338',
     marginBottom: 20,
   },
   adButtonText: {
     color: '#A0A0B0',
     fontSize: 14,
     fontWeight: '700',
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
   },
   paywallReset: {
     padding: 8,
@@ -501,5 +515,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     textDecorationLine: 'underline',
+    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
   },
 });

@@ -1,6 +1,6 @@
 # Covenant Odyssey
 
-**Covenant Odyssey** is an immersive, mature, choose-your-own-adventure (CYOA) experience that brings the depth and raw humanity of biblical narratives to life using generative AI. 
+**Covenant Odyssey** is an immersive, mature, interactive branching narrative experience that brings the depth and raw humanity of biblical narratives to life using generative AI. 
 
 Players make meaningful choices mirroring the full spectrum of scripture—faith, doubt, war, betrayal, passion, and redemption—shaping their path toward multiple unique endings.
 

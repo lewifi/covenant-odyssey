@@ -1,7 +1,7 @@
 # Covenant Odyssey – Project Idea
 
 ## Vision
-**Covenant Odyssey** is an immersive, adult-oriented choose-your-own-adventure experience that brings the full spectrum of biblical narratives to life through generative AI.
+**Covenant Odyssey** is an immersive, adult-oriented interactive branching narrative experience that brings the full spectrum of biblical narratives to life through generative AI.
 
 Players step into the role of Eliab (or other characters in add-on arcs) and make meaningful choices that echo the raw humanity of Scripture — faith, doubt, passion, war, betrayal, lust, and redemption — while steering toward dramatic conclusions.
 
