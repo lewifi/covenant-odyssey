@@ -37,6 +37,13 @@
       background-size: cover;
       background-position: center;
       z-index: 0;
+      transform-origin: center center;
+      animation: kenBurns 22s ease-in-out infinite alternate;
+    }
+
+    @keyframes kenBurns {
+      0%   { transform: scale(1)    translate(0px, 0px); }
+      100% { transform: scale(1.04) translate(-12px, -4px); }
     }
 
     /* ── Z-Layer 1: Left gradient overlay for text readability ── */
@@ -52,6 +59,16 @@
       );
       z-index: 1;
       pointer-events: none;
+    }
+
+    /* ── Z-Layer 1b: Atmospheric dust mote canvas ── */
+    #atmos-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
     }
 
     /* ── Z-Layer 2: Header bar ── */
@@ -556,6 +573,9 @@
   <!-- Z-Layer 1: Text gradient overlay -->
   <div id="text-gradient"></div>
 
+  <!-- Z-Layer 1b: Atmospheric dust mote canvas -->
+  <canvas id="atmos-canvas"></canvas>
+
   <!-- Z-Layer 2: Header -->
   <header id="header">
     <div id="header-brand">
@@ -717,6 +737,69 @@
         actionPanel.classList.remove('open');
       }
     });
+    // ── Cinematic Lens: Atmospheric dust mote engine ──
+    (function() {
+      const canvas = document.getElementById('atmos-canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Scene atmosphere presets — call setAtmosphere() when a new scene loads
+      // Desert / fire / dawn:  { r:212, g:175, b:55  }  warm gold
+      // Night / moonlit:       { r:160, g:190, b:220 }  cold blue
+      // Storm / ash:           { r:140, g:140, b:150 }  muted grey
+      // Rain / mist:           { r:180, g:200, b:210 }  cool silver
+      let atmosColor = { r: 212, g: 175, b: 55 }; // default: warm gold (desert/fire)
+
+      window.setAtmosphere = function(color) {
+        atmosColor = color;
+      };
+
+      const PARTICLE_COUNT = 38;
+      const particles = [];
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function makeParticle(randomY) {
+        return {
+          x:       Math.random() * canvas.width,
+          y:       randomY !== undefined ? randomY : Math.random() * canvas.height,
+          radius:  Math.random() * 1.2 + 0.4,          // 0.4 - 1.6 px
+          opacity: Math.random() * 0.13 + 0.03,         // 0.03 - 0.16 (very subtle)
+          vx:      0.18 + Math.random() * 0.12,         // rightward crosswind
+          vy:      -(0.04 + Math.random() * 0.07),      // faint upward drift
+        };
+      }
+
+      resize();
+      window.addEventListener('resize', () => { resize(); });
+      for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(makeParticle());
+
+      function tick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const { r, g, b } = atmosColor;
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // Wrap: when off right edge, re-enter from left at a random y
+          if (p.x > canvas.width  + 4) { p.x = -4; p.y = Math.random() * canvas.height; }
+          // Wrap: when off top edge, re-enter from bottom
+          if (p.y < -4)                { p.y = canvas.height + 4; p.x = Math.random() * canvas.width; }
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r},${g},${b},${p.opacity})`;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      tick();
+    })();
   </script>
 </body>
 </html>
