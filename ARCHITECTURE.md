@@ -71,8 +71,7 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
 
 ### Brand Hierarchy
 - **The Universe / Platform**: Covenant Odyssey
-- **The Main Mechanics / Theme**: Divergent Prophecies
-- **Tagline**: Cast Your Lot
+- **The Main Mechanics / Theme / Tagline**: Divergent Prophecies
 - **Chapter 1 (Addon Pack)**: Kingdoms & Prophets — The Story of Eliab
 
 Future addon packs follow the same pattern under the Covenant Odyssey universe (e.g., Genesis Cycle, Exodus & Conquest, Exile & Return, Fulfillment Arc).
