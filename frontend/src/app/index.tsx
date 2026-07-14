@@ -10,6 +10,7 @@ import {
   Platform,
   ImageBackground,
   Image,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, Choice } from '@/store/useGameStore';
@@ -42,6 +43,44 @@ export default function GameScreen() {
 
   const [hoveredChoiceId, setHoveredChoiceId] = React.useState<string | null>(null);
 
+  // ─── SENTENCE REVEAL ANIMATION ───
+  // Split sceneText into sentences, reveal them staggered with fade+slide,
+  // shimmer the most-recently-revealed sentence (mimics Lumo Dreams word-glow).
+  const sentences = React.useMemo(() => {
+    if (!sceneText) return [];
+    return sceneText
+      .split(/(?<=[.!?])\s+/)
+      .map(s => s.trim())
+      .filter(Boolean);
+  }, [sceneText]);
+
+  const [revealedCount, setRevealedCount] = React.useState(0);
+  const sentenceAnims = React.useRef<Animated.Value[]>([]);
+
+  // Reset + replay reveal whenever the scene text changes
+  React.useEffect(() => {
+    setRevealedCount(0);
+    sentenceAnims.current = sentences.map(() => new Animated.Value(0));
+
+    let cancelled = false;
+    const reveal = (idx: number) => {
+      if (cancelled || idx >= sentences.length) return;
+      Animated.spring(sentenceAnims.current[idx], {
+        toValue: 1,
+        tension: 60,
+        friction: 10,
+        useNativeDriver: true,
+      }).start(() => {
+        if (!cancelled) {
+          setRevealedCount(idx + 1);
+          setTimeout(() => reveal(idx + 1), 320);
+        }
+      });
+    };
+    const t = setTimeout(() => reveal(0), 200);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [sceneText]);
+
   // ─── HEADER BAR (Z-Layer 2) ───
   const renderHeader = () => (
     <View style={styles.headerBar}>
@@ -72,10 +111,88 @@ export default function GameScreen() {
   // ─── STORY TEXT ZONE (Z-Layer 3, left 40%) ───
   const renderStoryText = () => (
     <View style={styles.storyZone}>
+      {/* Web: inject shimmer CSS once */}
+      {Platform.OS === 'web' && (
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes sentence-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+          .sentence-current {
+            font-weight: 700;
+            background: linear-gradient(
+              120deg,
+              #D4AF37 0%,
+              #D4AF37 30%,
+              #fff7d6 50%,
+              #D4AF37 70%,
+              #D4AF37 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sentence-shimmer 4s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(212,175,55,0.6));
+          }
+          .sentence-spoken {
+            opacity: 0.65;
+          }
+          .sentence-pending {
+            opacity: 0;
+          }
+        `}} />
+      )}
+
       <Text style={styles.storyTitle}>{sceneTitle}</Text>
       <View style={styles.storyDivider} />
+
       <ScrollView style={styles.storyScroll} showsVerticalScrollIndicator={false}>
-        <Text style={styles.storyBody}>{sceneText}</Text>
+        {sentences.map((sentence, idx) => {
+          const anim = sentenceAnims.current[idx];
+          const isRevealed = idx < revealedCount;
+          const isCurrent = idx === revealedCount - 1;
+          const isSpoken = idx < revealedCount - 1;
+
+          if (!anim) return null;
+
+          const translateY = anim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [18, 0],
+          });
+
+          if (Platform.OS === 'web') {
+            // Web: use CSS class for shimmer
+            return (
+              <Animated.Text
+                key={idx}
+                style={[
+                  styles.storyBody,
+                  { opacity: anim, transform: [{ translateY }], marginBottom: 6 },
+                ]}
+                // @ts-ignore web-only className
+                className={isCurrent ? 'sentence-current' : isSpoken ? 'sentence-spoken' : 'sentence-pending'}
+              >
+                {sentence}{' '}
+              </Animated.Text>
+            );
+          }
+
+          // Native: use colour + opacity for current sentence highlight
+          return (
+            <Animated.Text
+              key={idx}
+              style={[
+                styles.storyBody,
+                { opacity: anim, transform: [{ translateY }], marginBottom: 6 },
+                isCurrent && styles.storyBodyCurrent,
+                isSpoken && styles.storyBodySpoken,
+              ]}
+            >
+              {sentence}{' '}
+            </Animated.Text>
+          );
+        })}
       </ScrollView>
     </View>
   );

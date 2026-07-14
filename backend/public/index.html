@@ -3,166 +3,443 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Covenant Odyssey - Theme Preview</title>
-  <!-- Google Fonts for premium typography -->
+  <title>Covenant Odyssey — Divergent Prophecies | Scene 1: The Burning Bush</title>
+  <meta name="description" content="The kingdoms fracture. Desire burns in tents and palaces alike. Walk your path of fire and flesh. Covenant Odyssey — Divergent Prophecies.">
+
+  <!-- OG / Social -->
+  <meta property="og:title" content="Covenant Odyssey — Divergent Prophecies">
+  <meta property="og:description" content="The kingdoms fracture. Blood will stain the throne before the anointed rises. Choose how you walk this path of fire and flesh.">
+  <meta property="og:image" content="Covenant-Odyssey-Divergent-Prophecies-og.jpg">
+  <meta property="og:type" content="website">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
   <style>
-    /* Reset & Base Styling */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    /* ── Z-Layer 0: Full-bleed scene art ── */
     body {
-      background: radial-gradient(circle at center, #171721 0%, #0A0A0C 100%);
-      color: #FFFFFF;
       font-family: 'Outfit', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      color: #fff;
+      background: #0A0A0C;
       position: relative;
     }
 
-    /* Background Ambient Glow */
-    .glow {
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(0,0,0,0) 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+    #scene-bg {
+      position: fixed;
+      inset: 0;
+      background-image: url('Kingdoms-and-Prophets-Moses-Tree-Fire.jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    /* ── Z-Layer 1: Left gradient overlay for text readability ── */
+    #text-gradient {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(10, 10, 12, 0.82) 0%,
+        rgba(10, 10, 12, 0.55) 38%,
+        rgba(10, 10, 12, 0.10) 60%,
+        transparent 100%
+      );
       z-index: 1;
       pointer-events: none;
     }
 
-    /* Theme Image Container */
-    .image-container {
-      z-index: 2;
-      width: 100%;
-      height: 100vh;
+    /* ── Z-Layer 2: Header bar ── */
+    #header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    #header-logo {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      color: #D4AF37;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    #header-actions {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
+      gap: 6px;
     }
 
-    .theme-image {
-      max-width: 100%;
-      max-height: 90vh;
-      object-fit: contain;
+    .header-btn {
+      background: rgba(84, 67, 56, 0.75);
+      border: 2px solid #3F3F54;
+      padding: 6px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #fff;
       border-radius: 0;
-      border: 4px solid #3F3F54;
-      box-shadow: 15px 15px 0px rgba(0, 0, 0, 1);
+      transition: border-color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .header-btn:hover {
+      border-color: #D4AF37;
+      background: rgba(133, 106, 30, 0.75);
+    }
+    .header-btn.tts-active {
+      border-color: #D4AF37;
+      background: rgba(133, 106, 30, 0.75);
     }
 
-    @keyframes goldGlowPulse {
-      0% {
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 15px 15px 0px rgba(0, 0, 0, 1);
-        border-color: #3F3F54;
-      }
-      50% {
-        box-shadow: 0 0 35px rgba(212, 175, 55, 0.7), 15px 15px 0px rgba(0, 0, 0, 1);
-        border-color: #D4AF37;
-      }
-      100% {
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 15px 15px 0px rgba(0, 0, 0, 1);
-        border-color: #3F3F54;
-      }
-    }
-
-    @keyframes panelGlowPulse {
-      0% {
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 8px 8px 0px rgba(0, 0, 0, 1);
-        border-color: #544338;
-      }
-      50% {
-        box-shadow: 0 0 25px rgba(212, 175, 55, 0.6), 8px 8px 0px rgba(0, 0, 0, 1);
-        border-color: #D4AF37;
-      }
-      100% {
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.3), 8px 8px 0px rgba(0, 0, 0, 1);
-        border-color: #544338;
-      }
-    }
-
-    .theme-image:hover {
-      transform: translate(-2px, -2px);
-      animation: goldGlowPulse 2s infinite ease-in-out;
-    }
-
-    /* Brutalist Solid Overlay Panel with 75% Opacity */
-    .overlay-panel {
-      position: absolute;
-      bottom: 40px;
-      z-index: 3;
-      background: rgba(17, 17, 21, 0.75);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 16px 28px;
-      border-radius: 0;
-      border: 3px solid #544338;
-      box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
-      text-align: center;
-      animation: fadeInUp 0.5s ease-out;
-      transition: border-color 0.3s ease;
-    }
-
-    .overlay-panel:hover {
-      animation: panelGlowPulse 2s infinite ease-in-out;
-    }
-
-    .overlay-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #FFFFFF;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .overlay-sub {
+    #chapter-badge {
+      background: rgba(10, 10, 12, 0.75);
+      border: 2px solid #544338;
+      padding: 6px 12px;
       font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
+      font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
       color: #D4AF37;
-      margin-top: 6px;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
 
-    /* Keyframes */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
+    /* ── Z-Layer 3: Story text zone (left ~40%) ── */
+    #story-zone {
+      position: fixed;
+      top: 60px;
+      left: 16px;
+      bottom: 220px;
+      width: 40%;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 8px;
+      overflow: hidden;
+    }
+
+    #scene-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    #scene-divider {
+      width: 60px;
+      height: 3px;
+      background: #D4AF37;
+      margin-bottom: 18px;
+      flex-shrink: 0;
+    }
+
+    #scene-body {
+      overflow-y: auto;
+      flex: 1;
+      scrollbar-width: none;
+    }
+    #scene-body::-webkit-scrollbar { display: none; }
+
+    /* Each sentence is its own element */
+    .sentence {
+      display: block;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(14px, 1.4vw, 17px);
+      line-height: 1.75;
+      margin-bottom: 6px;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.8);
+      color: #E2E2E9;
+    }
+
+    .sentence.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Spoken (already read) — dimmed */
+    .sentence.spoken {
+      opacity: 0.6;
+      color: #B8B8CC;
+    }
+
+    /* Current (being read now) — Lumo-style gold shimmer */
+    .sentence.current {
+      opacity: 1;
+      font-weight: 600;
+      color: transparent;
+      background: linear-gradient(
+        120deg,
+        #D4AF37 0%,
+        #D4AF37 28%,
+        #fff8dc 50%,
+        #D4AF37 72%,
+        #D4AF37 100%
+      );
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: sentence-shimmer 4s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.55));
+      text-shadow: none;
+    }
+
+    @keyframes sentence-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Quote styling */
+    .sentence.quote {
+      font-style: italic;
+      border-left: 3px solid #D4AF37;
+      padding-left: 12px;
+      margin-top: 8px;
+    }
+
+    /* ── Z-Layer 4: Footer bar ── */
+    #footer {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 10;
+      padding: 8px 16px 16px;
+    }
+
+    #choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .choice-btn {
+      background: rgba(35, 35, 51, 0.75);
+      border: 2px solid #4A4A5A;
+      padding: 12px 16px;
+      border-radius: 0;
+      cursor: pointer;
+      color: #E2E2E9;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(12px, 1.2vw, 14px);
+      font-weight: 600;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      line-height: 1.4;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, background 0.2s, box-shadow 0.3s;
+    }
+
+    .choice-btn.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .choice-btn:hover {
+      border-color: #D4AF37;
+      background: rgba(84, 67, 56, 0.75);
+      box-shadow: 0 0 18px rgba(212, 175, 55, 0.35), 0 0 6px rgba(212, 175, 55, 0.2);
+    }
+
+    .choice-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #D4AF37;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 3px 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Alignment stats */
+    #alignment-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      padding-top: 4px;
+    }
+
+    .alignment-stat {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Choice selection flash */
+    @keyframes choiceSelect {
+      0%   { box-shadow: 0 0 0 rgba(212,175,55,0); }
+      40%  { box-shadow: 0 0 32px rgba(212,175,55,0.7); border-color: #D4AF37; }
+      100% { box-shadow: 0 0 0 rgba(212,175,55,0); opacity: 0; transform: translateX(-10px); }
+    }
+    .choice-btn.selected {
+      animation: choiceSelect 0.6s ease forwards;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      #story-zone {
+        width: 90%;
+        bottom: 250px;
+        top: 55px;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      .choice-btn { font-size: 12px; padding: 10px 12px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="glow"></div>
+  <!-- Z-Layer 0: Background -->
+  <div id="scene-bg"></div>
 
-  <div class="image-container">
-    <img src="Kingdoms-and-Prophets-Theme.png" alt="Kingdoms and Prophets Theme Artwork" class="theme-image">
-  </div>
+  <!-- Z-Layer 1: Text gradient overlay -->
+  <div id="text-gradient"></div>
 
-  <div class="overlay-panel">
-    <div class="overlay-title">Kingdoms & Prophets Theme</div>
-    <div class="overlay-sub">Covenant Odyssey &bull; Generative Chapter Art</div>
-  </div>
+  <!-- Z-Layer 2: Header -->
+  <header id="header">
+    <div id="header-logo">Covenant Odyssey</div>
+    <div id="header-actions">
+      <button class="header-btn" title="Save">💾</button>
+      <button class="header-btn" title="Load">📂</button>
+      <button class="header-btn tts-active" id="tts-btn" title="Toggle narration">🔊</button>
+      <button class="header-btn" title="Settings">⚙</button>
+      <div id="chapter-badge">⛪ Ch. 1</div>
+    </div>
+  </header>
 
+  <!-- Z-Layer 3: Story text zone -->
+  <section id="story-zone">
+    <h1 id="scene-title">The Burning Bush</h1>
+    <div id="scene-divider"></div>
+    <div id="scene-body">
+      <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
+      <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
+      <span class="sentence" data-idx="2">Before you, the bush burns fiercely — tongues of flame wrapping the branches without consuming them.</span>
+      <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
+      <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
+      <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. Choose how you will walk this path of fire and flesh."</span>
+    </div>
+  </section>
+
+  <!-- Z-Layer 4: Footer -->
+  <footer id="footer">
+    <div id="choices">
+      <button class="choice-btn" data-alignment="Righteous">
+        <span>Fall to the ground in reverence — "Speak, Lord. Your servant is listening."</span>
+        <span class="choice-badge">+Righteous</span>
+      </button>
+      <button class="choice-btn" data-alignment="Pragmatic">
+        <span>Step closer through the heat — "Why me, amid such lust, war, and betrayal?"</span>
+        <span class="choice-badge">+Pragmatic</span>
+      </button>
+      <button class="choice-btn" data-alignment="Rebel">
+        <span>Draw near boldly, heart pounding, recalling the passionate failings of the patriarchs.</span>
+        <span class="choice-badge">+Rebel</span>
+      </button>
+    </div>
+    <div id="alignment-row">
+      <span class="alignment-stat" style="color:#68D391" id="stat-r">🕊️ R:0</span>
+      <span class="alignment-stat" style="color:#D4AF37" id="stat-p">🛡️ P:0</span>
+      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e">⚔️ E:0</span>
+    </div>
+  </footer>
+
+  <script>
+    // ── Sentence reveal engine ──
+    const sentences = Array.from(document.querySelectorAll('.sentence'));
+    const choices = Array.from(document.querySelectorAll('.choice-btn'));
+    let currentIdx = -1;
+
+    function revealNext() {
+      const prev = currentIdx;
+      currentIdx++;
+
+      // Mark previous as spoken
+      if (prev >= 0 && sentences[prev]) {
+        sentences[prev].classList.remove('current');
+        sentences[prev].classList.add('spoken');
+      }
+
+      if (currentIdx < sentences.length) {
+        const el = sentences[currentIdx];
+        el.classList.add('revealed');
+
+        // Small delay then mark as current (shimmer)
+        setTimeout(() => {
+          el.classList.add('current');
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+          // Auto-advance to next sentence after reading time
+          const words = el.textContent.trim().split(/\s+/).length;
+          const readTime = Math.max(900, words * 280);
+          setTimeout(revealNext, readTime);
+        }, 80);
+      } else {
+        // All sentences done — reveal choices staggered
+        choices.forEach((btn, i) => {
+          setTimeout(() => btn.classList.add('revealed'), i * 160);
+        });
+      }
+    }
+
+    // Start after page settles
+    setTimeout(revealNext, 400);
+
+    // ── Choice interaction ──
+    let stats = { r: 0, p: 0, e: 0 };
+
+    choices.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const alignment = btn.dataset.alignment;
+        btn.classList.add('selected');
+
+        if (alignment === 'Righteous') stats.r += 5;
+        if (alignment === 'Pragmatic') stats.p += 5;
+        if (alignment === 'Rebel')     stats.e += 5;
+
+        document.getElementById('stat-r').textContent = `🕊️ R:${stats.r}`;
+        document.getElementById('stat-p').textContent = `🛡️ P:${stats.p}`;
+        document.getElementById('stat-e').textContent = `⚔️ E:${stats.e}`;
+
+        // After selection, fade to next scene (placeholder)
+        setTimeout(() => {
+          choices.forEach(b => b.style.opacity = '0.3');
+          // In production: fetch next scene from Worker API
+        }, 700);
+      });
+    });
+
+    // ── TTS mute toggle ──
+    const ttsBtn = document.getElementById('tts-btn');
+    let ttsOn = true;
+    ttsBtn.addEventListener('click', () => {
+      ttsOn = !ttsOn;
+      ttsBtn.textContent = ttsOn ? '🔊' : '🔇';
+      ttsBtn.classList.toggle('tts-active', ttsOn);
+    });
+  </script>
 </body>
 </html>
