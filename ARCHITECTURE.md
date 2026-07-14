@@ -48,6 +48,57 @@ Use Claude for critical code and story coherence. Use Gemini for cost-effective 
 
 API keys are separated between the Story generation engine (`GEMINI_STORY_API_KEY`), the Audio TTS generation engine (`GEMINI_TTS_API_KEY`), and the Image generation engine (`GEMINI_IMAGE_API_KEY`) for granular usage tracking.
 
+## Character Archetype System
+
+The player's Righteous / Pragmatic / Rebel scores form a triangular alignment space. Two outputs are derived from this:
+
+1. **Static archetype label** - computed instantly from score ratios, no API call, always visible
+2. **Gemini character summary** - richer narrative portrait generated at milestone events
+
+### Hybrid Approach (Option 3)
+- Footer stat tooltips always show the static label (instant, zero cost)
+- A persistent character card badge in the header shows the current archetype title
+- Full Gemini character summary (title + one-line read + flaw warning) is triggered at:
+  - Every 5 choices made
+  - Chapter transitions
+  - Major alignment swings (any axis shifts by 15+ in a single scene)
+
+### Static Archetype Lookup Table
+
+| Dominant alignment | Secondary | Archetype title | Character read |
+|---|---|---|---|
+| Righteous (clear) | - | The Prophet | Unwavering covenant keeper. Certainty is his strength and his blindness. |
+| Pragmatic (clear) | - | The Strategist | Survival above faith. Effective, cold, never fully committed. |
+| Rebel (clear) | - | The Zealot of Flesh | Driven by passion and defiance. Magnetic. Destructive. |
+| R + P, low E | - | The Covenant Diplomat | Balances divine will with earthly reality. Samuel-like. |
+| R + E, low P | - | The Burning Righteous | Zealous faith meets raw passion. Thinks God sanctions his fire. |
+| P + E, low R | - | The Warlord | Cunning and appetitive. No divine anchor. Hungers for power. |
+| All balanced | - | The Wanderer | Torn between all paths. No clean allegiance. The most human type. |
+| All low | - | The Hollow Man | Adrift. Makes no mark. Story will force a crisis. |
+
+**Threshold rules**: "clear dominant" = that axis is 15+ points ahead of both others. "balanced" = no axis leads by more than 10 points.
+
+### Gemini Character Summary Schema
+Generated at milestones, passed as part of the scene response:
+```json
+{
+  "archetypeTitle": "The Burning Righteous",
+  "archetypeRead": "Faith and passion war in you - God's fire burns, but so does your own desire.",
+  "archetypeFlaw": "Your certainty is becoming blindness. You hear what you want from the divine."
+}
+```
+`archetypeFlaw` is optional - only included when a genuine flaw pattern is apparent from choice history.
+
+### D1 Storage
+- **Static label**: Not stored. Computed in-memory from `righteous_score`, `pragmatic_score`, `rebel_score` which are already in the saves table.
+- **Gemini character summary**: Stored as `character_summary TEXT` (JSON blob) in the saves table. Written only at milestone triggers. Read back on load and displayed immediately without regenerating.
+
+### Display
+- **Header**: Small archetype title badge beside the chapter marker (Courier New, gold, uppercase) - updates after each milestone
+- **Footer**: Static label visible in alignment stat tooltips (already in place)
+- **Character card** (future): Expandable panel triggered from the header badge showing full title, read, and flaw warning with the mark.em shimmer on key phrases
+
+
 ## TTS Voice Model — Kingdoms & Prophets
 
 > **Development note**: TTS is disabled during development to preserve API tokens. Controlled via the `ttsEnabled` Zustand toggle — when off, all synthesis calls are skipped immediately and persistently. Enable only in production or for deliberate audio testing.

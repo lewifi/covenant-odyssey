@@ -1,0 +1,11 @@
+-- Migration 0001: add character_summary column to saves table
+-- Stores the Gemini-generated character portrait (title, read, flaw) as JSON.
+-- Only written at milestone triggers (every 5 choices, chapter breaks, major alignment swings).
+-- Static archetype label is NOT stored here - it is computed at runtime from the three score columns.
+ALTER TABLE saves ADD COLUMN character_summary TEXT DEFAULT NULL;
+-- character_summary shape (JSON):
+-- {
+--   "archetypeTitle": "The Burning Righteous",
+--   "archetypeRead":  "Faith and passion war in you - God's fire burns, but so does your own desire.",
+--   "archetypeFlaw":  "Your certainty is becoming blindness." (optional)
+-- }
