@@ -48,6 +48,48 @@ Use Claude for critical code and story coherence. Use Gemini for cost-effective 
 
 API keys are separated between the Story generation engine (`GEMINI_STORY_API_KEY`), the Audio TTS generation engine (`GEMINI_TTS_API_KEY`), and the Image generation engine (`GEMINI_IMAGE_API_KEY`) for granular usage tracking.
 
+## TTS Voice Model — Kingdoms & Prophets
+
+> **Development note**: TTS is disabled during development to preserve API tokens. Controlled via the `ttsEnabled` Zustand toggle — when off, all synthesis calls are skipped immediately and persistently. Enable only in production or for deliberate audio testing.
+
+### Model Configuration
+- **Gemini TTS speech model**: `Zubenelgenubi`
+- **Pitch**: Lower middle
+- **Audio profile**: A stern and weary gatekeeper
+- **Scene awareness**: Context-aware narration — tone and pacing shift with scene mood
+- **Genre context**: Fantasy RPG style
+
+### Narration Style
+- **Default pacing**: Measured, deliberate
+- **Urgency snap**: Pacing accelerates at dramatic peaks (e.g., divine commands, reveals)
+- **Tone baseline**: Tense and cautious — carries the weight of covenant consequences
+
+### Mood Tag System
+Scene narration scripts are tagged with mood directives that influence delivery. Tags are inline with the script and stripped before display:
+
+| Tag | Delivery instruction |
+|-----|---------------------|
+| `[aggression]` | Forceful, clipped — opens hard |
+| `[tension]` | Slower, breathier — builds dread |
+| `[agitation]` | Unsettled, slightly rushed |
+| `[determination]` | Firm, measured, inevitable |
+
+### Reference Script — Scene 1: The Burning Bush
+```
+[aggression] The golden dawn light cuts through the dust of the wadi.
+Your sheep bleat nervously.
+[tension] Before you, the bush burns fiercely — tongues of flame wrapping the branches without consuming them.
+[agitation] Heat radiates against your skin, carrying the scent of scorched earth and something sacred.
+The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.
+[determination] "Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. Choose how you will walk this path of fire and flesh."
+```
+
+### Integration Points (Phase 3)
+- Worker endpoint: `POST /api/tts` — accepts script + mood-tagged text, returns audio stream
+- Frontend: HTML5 `Audio` element (web) / `expo-av` (native), triggered after scene text loads
+- Mute toggle: `setTtsEnabled(false)` in Zustand immediately halts any pending or queued synthesis calls
+- Sentence shimmer sync: TTS word timing data (if available from API) drives the gold shimmer to the currently spoken sentence
+
 ## Design Guidelines & Styling Constants (Brutalist Pivot)
 
 - **Visual Theme**: Menacing, unfriendly, and raw brutalist style.
