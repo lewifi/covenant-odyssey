@@ -38,12 +38,12 @@
       background-position: center;
       z-index: 0;
       transform-origin: center center;
-      animation: kenBurns 22s ease-in-out infinite alternate;
+      animation: kenBurns 18s ease-in-out infinite alternate;
     }
 
     @keyframes kenBurns {
-      0%   { transform: scale(1)    translate(0px, 0px); }
-      100% { transform: scale(1.04) translate(-12px, -4px); }
+      0%   { transform: scale(1)    translate(0px,   0px); }
+      100% { transform: scale(1.06) translate(-14px, -5px); }
     }
 
     /* ── Z-Layer 1: Left gradient overlay for text readability ── */
@@ -753,7 +753,7 @@
         atmosColor = color;
       };
 
-      const PARTICLE_COUNT = 38;
+      const PARTICLE_COUNT = 60;
       const particles = [];
 
       function resize() {
@@ -765,10 +765,10 @@
         return {
           x:       Math.random() * canvas.width,
           y:       randomY !== undefined ? randomY : Math.random() * canvas.height,
-          radius:  Math.random() * 1.2 + 0.4,          // 0.4 - 1.6 px
-          opacity: Math.random() * 0.13 + 0.03,         // 0.03 - 0.16 (very subtle)
-          vx:      0.18 + Math.random() * 0.12,         // rightward crosswind
-          vy:      -(0.04 + Math.random() * 0.07),      // faint upward drift
+          radius:  Math.random() * 2.5 + 1.0,           // 1.0 - 3.5 px
+          opacity: Math.random() * 0.30 + 0.15,          // 0.15 - 0.45
+          vx:      0.20 + Math.random() * 0.15,          // rightward crosswind
+          vy:      -(0.05 + Math.random() * 0.08),       // faint upward drift
         };
       }
 
