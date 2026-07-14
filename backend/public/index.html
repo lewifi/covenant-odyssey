@@ -120,18 +120,18 @@
       text-transform: uppercase;
     }
 
-    /* ── Z-Layer 3: Story text zone (left ~40%) ── */
+    /* ── Z-Layer 3: Story text zone (left 50%, centered with padding) ── */
     #story-zone {
       position: fixed;
       top: 60px;
-      left: 16px;
-      bottom: 220px;
-      width: 40%;
+      left: 0;
+      bottom: 210px;
+      width: 50%;
       z-index: 3;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding-right: 8px;
+      padding: 0 40px 0 48px;
       overflow: hidden;
     }
 
@@ -234,6 +234,7 @@
       flex-direction: column;
       gap: 8px;
       margin-bottom: 8px;
+      max-width: 55%;
     }
 
     .choice-btn {
@@ -296,6 +297,33 @@
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 1px;
+      cursor: help;
+      position: relative;
+    }
+
+    /* Custom tooltip */
+    .alignment-stat::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 10, 12, 0.95);
+      border: 1px solid #544338;
+      color: #E2E2E9;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0;
+      white-space: nowrap;
+      padding: 5px 10px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      z-index: 99;
+    }
+    .alignment-stat:hover::after {
+      opacity: 1;
     }
 
     /* Choice selection flash */
@@ -370,9 +398,9 @@
       </button>
     </div>
     <div id="alignment-row">
-      <span class="alignment-stat" style="color:#68D391" id="stat-r"><i class="ri-scales-3-line"></i> R:0</span>
-      <span class="alignment-stat" style="color:#D4AF37" id="stat-p"><i class="ri-shield-line"></i> P:0</span>
-      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e"><i class="ri-sword-line"></i> E:0</span>
+      <span class="alignment-stat" style="color:#68D391" id="stat-r" data-tooltip="Righteous — obedience to covenant, prophetic faith, divine will"><i class="ri-scales-3-line"></i> R:0</span>
+      <span class="alignment-stat" style="color:#D4AF37" id="stat-p" data-tooltip="Pragmatic — survival, strategy, ambition, human reason"><i class="ri-shield-line"></i> P:0</span>
+      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e" data-tooltip="Rebel — passion, defiance, flawed desire, chaos"><i class="ri-sword-line"></i> E:0</span>
     </div>
   </footer>
 
