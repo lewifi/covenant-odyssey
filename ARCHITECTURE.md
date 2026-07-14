@@ -69,8 +69,15 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
 
 ## Branding & Legal Constraints
 
-- **Game Title**: Covenant Odyssey
-- **Subtitle / Tagline**: Divergent Prophecies: Cast Your Lot
+### Brand Hierarchy
+- **The Universe / Platform**: Covenant Odyssey
+- **The Main Mechanics / Theme**: Divergent Prophecies
+- **Tagline**: Cast Your Lot
+- **Chapter 1 (Addon Pack)**: Kingdoms & Prophets — The Story of Eliab
+
+Future addon packs follow the same pattern under the Covenant Odyssey universe (e.g., Genesis Cycle, Exodus & Conquest, Exile & Return, Fulfillment Arc).
+
+### Legal
 - **BANNED PHRASE**: "Choose Your Own Adventure" (and the acronym CYOA) is a registered trademark and must NEVER appear anywhere in code, prompts, UI text, documentation, marketing, or metadata. Use "interactive branching narrative" or "divergent prophecies" instead.
 
 ## UI Layout Architecture (Cinematic Full-Bleed)
