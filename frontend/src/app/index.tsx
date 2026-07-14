@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useGameStore, Choice } from '@/store/useGameStore';
 
-const LOGO_IMAGE = require('@/../../assets/images/Kingdoms-and-Prophets-Logo-Transparent.png');
+const LOGO_IMAGE = require('@/../../assets/images/Covenant-Odyssey-Divergent-Prophecies-Logo.png');
 const DEFAULT_BG = require('@/../../assets/images/Kingdoms-and-Prophets-Moses-Tree-Fire.jpg');
 
 export default function GameScreen() {
