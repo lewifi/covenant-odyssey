@@ -66,6 +66,11 @@ API keys are separated between the Story generation engine (`GEMINI_STORY_API_KE
   - **Background Opacity**: Layered background cards, boxes, and buttons may use `75%` opacity (e.g., `rgba(23, 23, 33, 0.75)` or charcoal brown with opacity) to add premium visual depth.
 - **Interactive Micro-animations**:
   - **Golden Pulse Hovers**: All interactive choice buttons, selectable options, and key hovered artwork cards must animate with a smooth, pulsing golden glow (`@keyframes goldGlowPulse`) to guide player focus and look highly premium.
+- **Icons**:
+  - **BANNED**: Emojis are absolutely banned everywhere — in UI, code comments, documentation, prompts, and git commit messages. They are inconsistent across platforms, render poorly, and break the brutalist aesthetic.
+  - **Web**: Use **Remix Icons** (via CDN `https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css`) — line style only (no fill variants unless specified).
+  - **React Native / Expo**: Use **`@expo/vector-icons`** (Ionicons outline set) — `import { Ionicons } from '@expo/vector-icons'`.
+  - **Icon Map**: Save=`ri-save-line`, Load=`ri-folder-open-line`, TTS On=`ri-volume-up-line`, TTS Off=`ri-volume-mute-line`, Settings=`ri-settings-3-line`, Chapter=`ri-bookmark-line`, Righteous=`ri-scales-3-line`, Pragmatic=`ri-shield-line`, Rebel=`ri-sword-line`.
 
 ## Branding & Legal Constraints
 
@@ -108,7 +113,7 @@ AI-generated scene images must always be prompted with:
 
 ### Loading Screen
 - Moses burning bush image as full-bleed background
-- Centered Covenant Odyssey Divergent Phrophecies shield logo (400×342 PNG with transparency)
+- Centered Covenant Odyssey Divergent Prophecies shield logo (400×342 PNG with transparency)
 - Gold activity spinner below logo
 
 ## Asset Size Rules
