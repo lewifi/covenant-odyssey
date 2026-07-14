@@ -298,4 +298,52 @@ AI-generated scene images must always be prompted with:
 - **Logos/Icons**: PNG only when transparency is needed, resized to 2x display resolution max
 - **Target height**: Background images capped at 1200px height, width scaled proportionally
 
+---
+
+## Mobile Layout (max-width: 768px) — STACKING RULES
+
+On mobile, the left/right split collapses into a vertical stack. These rules are locked.
+
+- **Story zone**: Full width (`left: 0; width: 100%`). Text anchors to the **top** of its zone (`justify-content: flex-start; padding-top: 16px`). Bottom clearance is `230px` — enough to guarantee 3 stacked choice buttons + the stats row never overlap.
+- **Choices zone**: Stacked vertically at the bottom (`flex-direction: column; justify-content: flex-end; bottom: 48px`). Left-aligned. No stagger indent on mobile.
+- **Header**: Logo shrinks to `56px`. Tagline uses `clamp(7px, 1.8vw, 11px)`. Inline action buttons hidden, replaced by the seal-mark toggle.
+- **Gradient**: Switches from left-fade to top+bottom fade (`to bottom`, dark at both ends, lighter in the middle).
+- **NEVER use `justify-content: center` on the story zone on mobile** — it floats text into the center of the zone and overlaps the fixed choices below.
+
+---
+
+## Button Design System — LOCKED
+
+All interactive buttons across the UI use the same left-border-only style:
+
+- `border: none; border-left: 3px solid [color]`
+- `border-radius: 0` (zero rounded corners, always)
+- Hover: `border-left-color: #D4AF37` (gold pulse) + amber background + gold glow `box-shadow`
+- No border on top, right, or bottom on any button
+
+| Button type | Resting left border | Hover/active |
+|---|---|---|
+| Choice buttons | `#6A6A7A` grey | `#D4AF37` gold |
+| Header icon buttons | `#544338` dark amber | `#D4AF37` gold |
+| Chapter badge | `#D4AF37` gold (always) | — |
+| Quote blockquote | `#D4AF37` gold (always) | — |
+
+---
+
+## Choice Text Length — ENFORCED AT TWO LAYERS
+
+Choice button text must never be so long it breaks the layout or wraps beyond 2 lines.
+
+**Layer 1 - System prompt**: The Gemini system prompt mandates `"Maximum 12 words. Short, punchy, decisive - written as a first-person action or brief direct quote."`
+
+**Layer 2 - CSS safety net** (applied on `.choice-btn span:first-child`):
+```css
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+```
+
+Both layers must remain in sync. If the system prompt changes, verify the CSS cap is still appropriate.
+
 Last Updated: July 14, 2026

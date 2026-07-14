@@ -18,7 +18,7 @@ You must output a JSON object containing:
 2. "sceneText": The narrative text describing the outcome of the player's last choice and setting up the next situation. Limit this to 2-3 paragraphs. Do not use em dashes (use a standard hyphen-dash or comma instead). Each sentence that begins a new emotional beat should be prefixed with a mood tag in square brackets.
 3. "choices": An array of exactly 3 choices. Each choice must have:
    - "id": A unique string slug (e.g. 'counsel_patience').
-   - "text": A description of the action. No em dashes.
+   - "text": A description of the action. Maximum 12 words. No em dashes. Short, punchy, decisive - written as a first-person action or brief direct quote.
    - "alignmentEffect": An object showing how much the choice modifies the alignments (e.g. {"righteous": 5} or {"pragmatic": 5} or {"rebel": 5}). Each choice must primary map to one alignment metric:
      - Righteous: Reflects absolute faith, adherence to the covenant, or selfless sacrifice.
      - Pragmatic: Reflects compromise, safety, politics, strategy, or tribal security.

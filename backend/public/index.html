@@ -414,6 +414,14 @@
     .choice-btn:nth-child(2) { margin-left: 24px; }
     .choice-btn:nth-child(3) { margin-left: 12px; }
 
+    /* Safety net: cap choice text at 2 lines regardless of Gemini output length */
+    .choice-btn span:first-child {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     .choice-btn.revealed {
       opacity: 1;
       transform: translateX(0);
@@ -523,14 +531,14 @@
         );
       }
 
-      /* Story zone: full width, top section */
+      /* Story zone: full width, text anchored to top — never floats into choices */
       #story-zone {
         width: 100%;
         left: 0;
         top: 80px;
-        bottom: 190px;
-        padding: 0 20px;
-        justify-content: center;
+        bottom: 230px;
+        padding: 16px 20px 0;
+        justify-content: flex-start;
       }
 
       /* Choices: full-width, stacked at bottom above stats */
