@@ -209,44 +209,84 @@
       text-transform: uppercase;
     }
 
-    /* ── Z-Layer 3: Story text zone (left 50%, vertically 132px top to 60px from bottom) ── */
+    /* ── Z-Layer 3: Story zone — transparent pointer-events pass-through ── */
     #story-zone {
       position: fixed;
-      top: 132px;
-      left: 0;
-      bottom: 60px;
-      width: 50%;
+      inset: 0;
       z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── Stone Tablet: draggable text surface ── */
+    #story-tablet {
+      position: fixed;
+      top: 118px;
+      left: 24px;
+      width: 46vw;
+      height: calc(100vh - 178px);
+      z-index: 5;
+      cursor: grab;
+      user-select: none;
+      pointer-events: all;
+      background: url('Tablet.png') center center / 100% 100% no-repeat;
+      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.55));
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 0 40px 0 48px;
+      transition: filter 0.2s;
+    }
+    #story-tablet.dragging {
+      cursor: grabbing;
+      filter: drop-shadow(0 14px 52px rgba(0,0,0,0.75));
+    }
+
+    /* Inner text area — inset from rough stone edges */
+    #story-inner {
+      padding: 64px 72px 72px 76px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
       overflow: hidden;
     }
 
     #scene-title {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(22px, 3vw, 34px);
+      font-size: clamp(17px, 2.2vw, 26px);
       font-weight: 800;
-      color: #fff;
+      color: #1A0D06;
       letter-spacing: 0.5px;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.8);
-      margin-bottom: 10px;
+      text-shadow: none;
+      margin-bottom: 8px;
       line-height: 1.2;
     }
 
     #scene-divider {
-      width: 60px;
-      height: 3px;
-      background: #D4AF37;
-      margin-bottom: 18px;
+      width: 52px;
+      height: 2px;
+      background: #8B6914;
+      margin-bottom: 16px;
       flex-shrink: 0;
     }
 
-    #story-inner {
-      display: flex;
-      flex-direction: column;
-      max-height: 100%;
+    /* ── Burn-in: text reveals as fire etching into stone ── */
+    @keyframes burnIn {
+      0%   { opacity: 0.85; color: #FF8000;
+             text-shadow: 0 0 20px #FF5500, 0 0 40px #FF2200, 0 0 60px #FF0000; }
+      14%  { opacity: 1; color: #E06000;
+             text-shadow: 0 0 14px #CC4400, 0 0 28px #AA2200; }
+      55%  { color: #7A3010; text-shadow: 0 0 5px rgba(160,70,20,0.4); }
+      100% { color: #2C1810; text-shadow: none; }
+    }
+    @keyframes burnInDivine {
+      0%   { opacity: 0.85; color: #FFFFFF;
+             text-shadow: 0 0 30px #FFD700, 0 0 60px #FFAA00, 0 0 90px #FF6600;
+             border-left-color: #FF8800; }
+      16%  { opacity: 1; color: #FFE040;
+             text-shadow: 0 0 20px #FFB800, 0 0 40px #FF8800;
+             border-left-color: #FFB800; }
+      65%  { color: #A0720A; text-shadow: 0 0 5px rgba(200,140,10,0.4);
+             border-left-color: #CC9A14; }
+      100% { color: #6B4D0A; text-shadow: none; border-left-color: #D4AF37; }
     }
 
     #scene-body {
@@ -259,52 +299,55 @@
     .sentence {
       display: block;
       font-family: 'Outfit', sans-serif;
-      font-size: clamp(14px, 1.4vw, 17px);
+      font-size: clamp(12px, 1.2vw, 15px);
+      font-weight: 700;
       line-height: 1.75;
       margin-bottom: 6px;
       opacity: 0;
-      transform: translateY(18px);
-      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
-      text-shadow: 1px 1px 6px rgba(0,0,0,0.8);
-      color: #E2E2E9;
+      transition: color 0.4s ease, opacity 0.4s ease;
+      text-shadow: none;
+      color: #2C1810;
     }
 
+    /* Reveal: fire burns text into stone */
     .sentence.revealed {
-      opacity: 1;
-      transform: translateY(0);
+      animation: burnIn 1.2s ease-out forwards;
+    }
+    .sentence.quote.revealed {
+      animation: burnInDivine 1.5s ease-out forwards;
     }
 
-    /* Spoken (already read) — dimmed */
+    /* Spoken (already read) — faded inscription */
     .sentence.spoken {
       opacity: 0.6;
-      color: #B8B8CC;
+      color: #6B4F3A;
     }
 
-    /* Quote sentences never dim — divine voice stays at full brightness */
+    /* Quote spoken — divine voice stays warm gold */
     .sentence.quote.spoken {
-      opacity: 1;
-      color: #E2E2E9;
+      opacity: 0.8;
+      color: #7A5C10;
     }
 
-    /* Current (being read now) — Lumo-style gold shimmer */
+    /* Current (being read now) — gold shimmer tuned for stone surface */
     .sentence.current {
       opacity: 1;
-      font-weight: 600;
+      font-weight: 700;
       color: transparent;
       background: linear-gradient(
         120deg,
-        #D4AF37 0%,
-        #D4AF37 28%,
-        #fff8dc 50%,
-        #D4AF37 72%,
-        #D4AF37 100%
+        #8B6914 0%,
+        #C9950A 25%,
+        #D4AF37 50%,
+        #C9950A 75%,
+        #8B6914 100%
       );
       background-size: 200% auto;
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: sentence-shimmer 4s linear infinite;
-      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.55));
+      animation: sentence-shimmer 3.5s linear infinite;
+      filter: drop-shadow(0 1px 8px rgba(180,130,10,0.75)) drop-shadow(0 0 3px rgba(212,175,55,0.5));
       text-shadow: none;
     }
 
@@ -336,7 +379,7 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: em-shimmer 5s linear infinite;
-      filter: drop-shadow(0 0 6px rgba(212,175,55,0.5));
+      filter: drop-shadow(0 1px 10px rgba(212,175,55,0.8)) drop-shadow(0 0 4px rgba(255,200,50,0.6));
       font-style: inherit;
       font-weight: 700;
       background-color: transparent;
@@ -519,26 +562,28 @@
       .header-btn { width: 32px; height: 32px; font-size: 16px; }
       #chapter-badge { font-size: 10px; padding: 5px 8px; }
 
-      /* Gradient: full-width top+bottom fade to wrap both text zones */
+      /* Gradient: atmospheric only — tablet handles text area */
       #text-gradient {
         width: 100%;
         background: linear-gradient(
           to bottom,
-          rgba(10,10,12,0.88) 0%,
-          rgba(10,10,12,0.55) 45%,
-          rgba(10,10,12,0.55) 55%,
-          rgba(10,10,12,0.88) 100%
+          rgba(10,10,12,0.7) 0%,
+          transparent 30%,
+          transparent 70%,
+          rgba(10,10,12,0.7) 100%
         );
       }
 
-      /* Story zone: full width, text anchored to top — never floats into choices */
-      #story-zone {
-        width: 100%;
-        left: 0;
-        top: 80px;
-        bottom: 230px;
-        padding: 16px 20px 0;
-        justify-content: flex-start;
+      /* Tablet: wider, top-anchored on mobile */
+      #story-tablet {
+        width: 88vw;
+        left: 6vw;
+        top: 76px;
+        height: auto;
+        max-height: 48vh;
+      }
+      #story-inner {
+        padding: 44px 48px 48px 52px;
       }
 
       /* Choices: full-width, stacked at bottom above stats */
@@ -625,18 +670,21 @@
     <div id="chapter-badge-m" style="background:rgba(10,10,12,0.75);border:2px solid #544338;padding:5px 10px;font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:#D4AF37;letter-spacing:1px;text-transform:uppercase;"><i class="ri-bookmark-line"></i> Ch. 1</div>
   </div>
 
-  <!-- Z-Layer 3: Story text zone -->
+  <!-- Z-Layer 3: Story zone (transparent) -->
   <section id="story-zone">
-    <div id="story-inner">
-      <h1 id="scene-title">The Burning Bush</h1>
-      <div id="scene-divider"></div>
-      <div id="scene-body">
-        <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
-        <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
-        <span class="sentence" data-idx="2">Before you, the bush burns fiercely, tongues of flame wrapping the branches without consuming them.</span>
-        <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
-        <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
-        <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. <mark class="em">Choose how you will walk this path of fire and flesh.</mark>"</span>
+    <!-- Stone tablet — draggable. Drag from title/stone border; text body remains scrollable -->
+    <div id="story-tablet" title="Drag to reposition">
+      <div id="story-inner">
+        <h1 id="scene-title">The Burning Bush</h1>
+        <div id="scene-divider"></div>
+        <div id="scene-body">
+          <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
+          <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
+          <span class="sentence" data-idx="2">Before you, the bush burns fiercely, tongues of flame wrapping the branches without consuming them.</span>
+          <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
+          <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
+          <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. <mark class="em">Choose how you will walk this path of fire and flesh.</mark>"</span>
+        </div>
       </div>
     </div>
   </section>
@@ -686,7 +734,7 @@
         const el = sentences[currentIdx];
         el.classList.add('revealed');
 
-        // Small delay then mark as current (shimmer)
+        // Let the fire burn before gold shimmer takes over (800ms matches ~67% of burnIn)
         setTimeout(() => {
           el.classList.add('current');
           el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -695,7 +743,7 @@
           const words = el.textContent.trim().split(/\s+/).length;
           const readTime = Math.max(900, words * 280);
           setTimeout(revealNext, readTime);
-        }, 80);
+        }, 800);
       } else {
         // All sentences done — reveal choices staggered
         choices.forEach((btn, i) => {
@@ -821,6 +869,48 @@
       }
 
       tick();
+    })();
+
+    // ── Stone Tablet: drag to reposition ──
+    (function() {
+      const tablet = document.getElementById('story-tablet');
+      const body   = document.getElementById('scene-body');
+      let down = false, sx, sy, ox, oy;
+
+      function onStart(e) {
+        down = true;
+        const pt = e.touches ? e.touches[0] : e;
+        sx = pt.clientX;
+        sy = pt.clientY;
+        const r = tablet.getBoundingClientRect();
+        ox = r.left;
+        oy = r.top;
+        tablet.classList.add('dragging');
+        e.preventDefault();
+      }
+
+      function onMove(e) {
+        if (!down) return;
+        const pt = e.touches ? e.touches[0] : e;
+        // Clamp so tablet stays partially on screen
+        const newLeft = Math.max(-tablet.offsetWidth * 0.5, Math.min(window.innerWidth - 80, ox + pt.clientX - sx));
+        const newTop  = Math.max(0, Math.min(window.innerHeight - 80, oy + pt.clientY - sy));
+        tablet.style.left = newLeft + 'px';
+        tablet.style.top  = newTop  + 'px';
+        e.preventDefault();
+      }
+
+      function onEnd() {
+        down = false;
+        tablet.classList.remove('dragging');
+      }
+
+      tablet.addEventListener('mousedown',  onStart);
+      tablet.addEventListener('touchstart', onStart, { passive: false });
+      document.addEventListener('mousemove',  onMove);
+      document.addEventListener('touchmove',  onMove, { passive: false });
+      document.addEventListener('mouseup',   onEnd);
+      document.addEventListener('touchend',  onEnd);
     })();
   </script>
 </body>
