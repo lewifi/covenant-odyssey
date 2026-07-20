@@ -61,59 +61,111 @@ function stripMoodTags(text: string): string {
   return text.replace(/\[[a-z]+\]/gi, '').replace(/ {2,}/g, ' ').trim();
 }
 
-// ── Atmospheric dust motes: cross-platform Animated (no canvas, no deps) ──
-function Motes({ width, height, active }: { width: number; height: number; active: boolean }) {
-  // Use percentage values to avoid clustering at 0,0 if initial layout returns width/height as 0
-  const motes = React.useRef(
-    Array.from({ length: 14 }, () => ({
-      xPct: Math.random(),
-      yPct: Math.random(),
-      size: 1.5 + Math.random() * 2.5,
-      opacity: 0.15 + Math.random() * 0.3,
-      drift: new Animated.Value(0),
-      dur: 9000 + Math.random() * 9000,
-    }))
-  ).current;
+// ── Atmospheric dust motes: cross-platform Canvas-based on Web (temp-web) ──
+function CanvasMotes({ active }: { active: boolean }) {
+  const canvasRef = React.useRef<any>(null);
 
   React.useEffect(() => {
-    if (!active) return;
-    const loops = motes.map((m) =>
-      Animated.loop(
-        Animated.timing(m.drift, { toValue: 1, duration: m.dur, easing: Easing.linear, useNativeDriver: true })
-      )
-    );
-    loops.forEach((l) => l.start());
-    return () => loops.forEach((l) => l.stop());
+    const canvas = canvasRef.current;
+    if (!canvas || !active) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    const PARTICLE_COUNT = 60;
+    const particles: Array<{
+      x: number;
+      y: number;
+      radius: number;
+      opacity: number;
+      vx: number;
+      vy: number;
+    }> = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    const makeParticle = (randomY?: number) => {
+      return {
+        x: Math.random() * canvas.width,
+        y: randomY !== undefined ? randomY : Math.random() * canvas.height,
+        radius: Math.random() * 1.8 + 0.8, // 0.8 - 2.6 px
+        opacity: Math.random() * 0.28 + 0.20, // 0.20 - 0.48
+        vx: 0.20 + Math.random() * 0.15,
+        vy: -(0.05 + Math.random() * 0.08),
+      };
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(makeParticle());
+    }
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const r = 212, g = 175, b = 55; // Gold default
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x > canvas.width + 4) {
+          p.x = -4;
+          p.y = Math.random() * canvas.height;
+        }
+        if (p.y < -4) {
+          p.y = canvas.height + 4;
+          p.x = Math.random() * canvas.width;
+        }
+
+        ctx.beginPath();
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+        grad.addColorStop(0, `rgba(${r},${g},${b},${p.opacity})`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      animationFrameId = requestAnimationFrame(tick);
+    };
+
+    tick();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
   }, [active]);
 
-  if (!active) return null;
-  // Fallback to absolute screen bounds if layout dimensions are not resolved yet
-  const actualW = width || 1024;
-  const actualH = height || 768;
-
   return (
-    <View style={[StyleSheet.absoluteFill, { zIndex: 2 }]} pointerEvents="none">
-      {motes.map((m, i) => (
-        <Animated.View
-          key={i}
-          style={{
-            position: 'absolute',
-            left: m.xPct * actualW,
-            top: m.yPct * actualH,
-            width: m.size,
-            height: m.size,
-            borderRadius: m.size,
-            backgroundColor: GOLD,
-            opacity: m.drift.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, m.opacity, 0] }),
-            transform: [
-              { translateX: m.drift.interpolate({ inputRange: [0, 1], outputRange: [0, 60] }) },
-              { translateY: m.drift.interpolate({ inputRange: [0, 1], outputRange: [0, -40] }) },
-            ],
-          }}
-        />
-      ))}
-    </View>
+    // @ts-ignore - raw HTML tags on Web
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 2,
+        pointerEvents: 'none',
+      }}
+    />
   );
+}
+
+function Motes({ width, height, active }: { width: number; height: number; active: boolean }) {
+  if (Platform.OS !== 'web') {
+    return null;
+  }
+  return <CanvasMotes active={active} />;
 }
 
 export default function GameScreen() {
@@ -193,7 +245,7 @@ export default function GameScreen() {
   const ensureAtmos = React.useCallback(async () => {
     try {
       if (!atmosRef.current) {
-        const { sound } = await Audio.Sound.createAsync(ATMOS_LOOP, { isLooping: true, volume: 0.25 });
+        const { sound } = await Audio.Sound.createAsync(ATMOS_LOOP, { isLooping: true, volume: 0.02 });
         atmosRef.current = sound;
       }
       // Web autoplay may have blocked the mount-time play; a gesture-time call
