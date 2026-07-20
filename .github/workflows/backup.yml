@@ -1,0 +1,96 @@
+# Off-site backup of Cloudflare D1 + R2.
+#
+# Runs on GitHub Actions (NOT a Cloudflare Cron Worker) on purpose: if your
+# Cloudflare account is ever suspended, this pipeline still runs and your last
+# backup is already off-platform. D1 -> SQL dump, R2 -> object mirror, both
+# pushed to any S3-compatible store (Backblaze B2 / Wasabi / AWS S3 / MinIO).
+#
+# One-time setup (repo Settings -> Secrets and variables -> Actions):
+#   Secrets:
+#     CLOUDFLARE_API_TOKEN        (D1 read + account read)
+#     CLOUDFLARE_ACCOUNT_ID
+#     R2_ACCESS_KEY_ID           (R2 API token - only if you use R2)
+#     R2_SECRET_ACCESS_KEY
+#     OFF_S3_ACCESS_KEY_ID       (destination store)
+#     OFF_S3_SECRET_ACCESS_KEY
+#     OFF_S3_ENDPOINT            (e.g. https://s3.us-west-004.backblazeb2.com)
+#   Variables:
+#     D1_DATABASE                (e.g. covenant-odyssey-db)
+#     R2_BUCKET                  (leave empty until R2 is in use)
+#     OFF_BUCKET                 (destination bucket name)
+#     OFF_S3_PROVIDER            (Backblaze | Wasabi | AWS | Other)
+#     BACKUP_RETENTION_DAYS      (e.g. 30)
+
+name: Off-site backup (D1 + R2)
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # daily 03:00 UTC
+  workflow_dispatch: {} # allow manual "Run workflow"
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      D1_DATABASE: ${{ vars.D1_DATABASE }}
+      R2_BUCKET: ${{ vars.R2_BUCKET }}
+      OFF_BUCKET: ${{ vars.OFF_BUCKET }}
+      BACKUP_RETENTION_DAYS: ${{ vars.BACKUP_RETENTION_DAYS || '30' }}
+      # rclone source remote "R2:" (Cloudflare R2, S3-compatible)
+      RCLONE_CONFIG_R2_TYPE: s3
+      RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+      RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      # rclone destination remote "OFF:" (your off-site S3-compatible store)
+      RCLONE_CONFIG_OFF_TYPE: s3
+      RCLONE_CONFIG_OFF_PROVIDER: ${{ vars.OFF_S3_PROVIDER }}
+      RCLONE_CONFIG_OFF_ACCESS_KEY_ID: ${{ secrets.OFF_S3_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_OFF_SECRET_ACCESS_KEY: ${{ secrets.OFF_S3_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_OFF_ENDPOINT: ${{ secrets.OFF_S3_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Export D1 to a timestamped SQL dump
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d-%H%M%S)
+          mkdir -p "$GITHUB_WORKSPACE/backups"
+          OUT="$GITHUB_WORKSPACE/backups/${D1_DATABASE}-${STAMP}.sql"
+          npx --yes wrangler@4 d1 export "$D1_DATABASE" --remote --output "$OUT"
+          gzip -9 "$OUT"
+          ls -lh "$GITHUB_WORKSPACE/backups"
+
+      - name: Install rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL https://rclone.org/install.sh | sudo bash
+          rclone version
+
+      - name: Upload D1 dump off-site
+        run: |
+          set -euo pipefail
+          rclone copy "$GITHUB_WORKSPACE/backups" "OFF:${OFF_BUCKET}/d1" --include "*.sql.gz" -v
+
+      - name: Mirror R2 bucket off-site
+        if: ${{ vars.R2_BUCKET != '' }}
+        run: |
+          set -euo pipefail
+          rclone sync "R2:${R2_BUCKET}" "OFF:${OFF_BUCKET}/r2/${R2_BUCKET}" --fast-list --transfers=16 -v
+
+      - name: Prune old D1 dumps beyond retention
+        run: |
+          set -euo pipefail
+          rclone delete "OFF:${OFF_BUCKET}/d1" --min-age "${BACKUP_RETENTION_DAYS}d" --include "*.sql.gz" -v || true

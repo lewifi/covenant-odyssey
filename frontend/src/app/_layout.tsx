@@ -1,18 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
-
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import React from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+// Covenant Odyssey is a single full-bleed cinematic screen - no tabs, no
+// headers, no template chrome. The GameScreen owns the whole viewport.
+export default function RootLayout() {
+  React.useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        title: 'Covenant Odyssey - Divergent Prophecies',
+        contentStyle: { backgroundColor: '#0A0A0C' },
+      }}
+    />
   );
 }

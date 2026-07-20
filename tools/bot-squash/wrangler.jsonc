@@ -1,0 +1,24 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "bot-squash",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-07-13",
+	"compatibility_flags": ["nodejs_compat"],
+
+	// Deploy this Worker in front of each domain by adding routes. One Worker,
+	// many zones - repeat the pattern per domain you want to protect:
+	// "routes": [
+	//   { "pattern": "example.com/*", "zone_name": "example.com" },
+	//   { "pattern": "www.example.com/*", "zone_name": "example.com" }
+	// ],
+
+	// Optional per-IP rate limiter. SQLite-backed DO works on the free plan.
+	// Remove this block (and overRateLimit will no-op) if you don't want it.
+	"durable_objects": {
+		"bindings": [{ "name": "RATE_LIMITER", "class_name": "RateLimiter" }]
+	},
+	"migrations": [{ "tag": "v1", "new_sqlite_classes": ["RateLimiter"] }],
+
+	"vars": { "BOT_SQUASH_RPM": "120" },
+	"observability": { "enabled": true }
+}

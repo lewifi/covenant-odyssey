@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-07-15
+
+### Design
+- Adopted the "Islands & Sea" content model: authored cinematic chapters (paid, convergent, cached art/TTS) alternating with a free "Go Wild" generative sandbox between chapters. Wild mode is text-driven, capped, seeded from the player's carried alignment, and uses a single cached backdrop per chapter (Chapter 1 = the desert) to hold image/TTS cost to a fixed floor.
+- Documented the convergent branching ("string of pearls") arc model: the LLM varies prose and texture while a JSON skeleton pins the fixed anchor beats and alignment-keyed endings, so playthroughs diverge in feel but reach the same conclusions.
+- Reprioritized the roadmap: inserted Phase 3 (Core Gameplay Loop) as current focus and shifted TTS, Image Generation, and Auth to Phases 4/5/6. Gameplay/skeleton must land first because the finite anchor set is what the expensive TTS and image layers cache against.
+
+### Added
+- Rebuilt the Expo `GameScreen` (`frontend/src/app/index.tsx`) as the canonical cross-platform UI (Expo was chosen over the HTML prototype because it ships app + web from one codebase). Flat brutalist cage (stone tablet removed from the game loop, retained for settings only), fire burn-in text reveal, Ken Burns background, and a new Scene Intro Camera establishing pull-back (punch-in on the right action zone then slow zoom-out) that replaces the loading spinner. Removed all banned emojis (now `@expo/vector-icons` Ionicons), switched the header to the word-only logo at 54px with the full shield+text logo on the paywall, dropped the alignment telegraph from choice buttons to preserve roleplay, fixed the chapter badge and stat labels (RGT/PRG/RBL), and added `prefers-reduced-motion` support. Typechecks clean; not yet run in-browser/on-device. Dust motes and true latency-gated camera timing deferred.
+- Added `@expo/vector-icons` and repaired the frontend `node_modules` (the install was incomplete - `@expo/cli` was missing). Copied the word-only and shield logo assets into `frontend/assets/images/`.
+- Implemented the Gemini TTS Worker endpoint (`POST /api/tts`): strips inline mood tags from the spoken text, translates them into a natural-language delivery-style prompt, synthesizes with the `Zubenelgenubi` voice, and wraps the returned PCM in a WAV container for direct browser/native playback. Plumbing only - not yet wired to the frontend and untested end-to-end (deferred to a live token pass per the dev-token conservation note).
+- Added the shared mood-tag pipeline (`backend/src/moodTags.ts`): `stripMoodTags` for display text, `extractMoodTags`, and `buildStylePrompt` mapping the ARCHITECTURE.md mood palette to TTS delivery instructions. Shared seam between text generation and TTS.
+- Created the full-screen Settings Menu Overlay using the static stone tablet background asset (`Tablet.png`) for mockup configuration. Snap transition on trigger with zero lag or blur.
+- Implemented settings controls for Save, Load, Voice Narration (TTS) toggle, Restart, and Resume inside the Settings Overlay.
+- Implemented the ampersand Typography RegEx Pipeline (`text.replace(/\band\b/gi, '&')`) for headings and subheadings.
+- Documented that Text-to-Speech (TTS) and Image Generation are down-the-track features, with image generation not required for the first release at all.
+
+### Changed
+- Removed the stone tablet motif from the primary narrative game loop to implement the flat digital brutalist cage.
+- Refined the desktop layout to use a rigid 50/50 horizontal split with a fixed shared vertical window (`top: 132px`, `bottom: 60px`) and vertical centering on story text.
+- Refined the mobile collapsing stacking layout, centering the background image focus region (1/3 from the right) using `object-position: 66.6% center`.
+- Banned and replaced all em dashes (`—` and `--`) globally with standard space-padded hyphens (` - `) or commas in UI text, code, templates, and documentation.
+- Updated `ARCHITECTURE.md` to Version 1.6 and `IDEA.md` to document settings overlay, ampersand pipeline, mobile background image alignment, and clean up em dashes.
+
 ## [Unreleased] - 2026-07-14
 
 ### Added

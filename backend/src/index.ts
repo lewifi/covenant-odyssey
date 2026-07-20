@@ -1,3 +1,7 @@
+import { stripMoodTags, buildStylePrompt } from "./moodTags";
+import { beatContext } from "./skeleton";
+import lamejs from "@breezystack/lamejs";
+
 export interface Env {
 	GEMINI_STORY_API_KEY: string;
 	GEMINI_TTS_API_KEY: string;
@@ -61,6 +65,95 @@ const RESPONSE_SCHEMA = {
 	required: ["sceneTitle", "sceneText", "choices"]
 };
 
+// Story model + relaxed safety so mature (non-explicit) biblical drama is not
+// filtered. gemini-2.5-flash is retired for new accounts; 3.1-flash-lite is proven
+// to deliver prestige-maturity content cleanly (STOP, no safety flags).
+const STORY_MODEL = "gemini-3.1-flash-lite";
+const SAFETY_SETTINGS = [
+	{ category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+	{ category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+	{ category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+	{ category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+];
+
+// ─── TTS (Gemini) ───
+// Voice + model per ARCHITECTURE.md. Disabled on the client by default during
+// dev to preserve tokens; this endpoint only runs when explicitly called.
+const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+const TTS_VOICE = "Zubenelgenubi";
+
+/** Decode a base64 string to raw bytes (atob is available in Workers). */
+function base64ToBytes(b64: string): Uint8Array {
+	const bin = atob(b64);
+	const bytes = new Uint8Array(bin.length);
+	for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+	return bytes;
+}
+
+/**
+ * Wrap raw PCM (signed 16-bit little-endian) in a minimal WAV container so the
+ * browser <audio> element / expo-av can play it directly. Gemini TTS returns
+ * headerless PCM, typically mono 24kHz.
+ */
+function pcmToWav(pcm: Uint8Array, sampleRate = 24000, channels = 1, bitsPerSample = 16): Uint8Array {
+	const blockAlign = (channels * bitsPerSample) / 8;
+	const byteRate = sampleRate * blockAlign;
+	const dataSize = pcm.length;
+	const buffer = new ArrayBuffer(44 + dataSize);
+	const view = new DataView(buffer);
+	const writeStr = (off: number, s: string) => {
+		for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i));
+	};
+	writeStr(0, "RIFF");
+	view.setUint32(4, 36 + dataSize, true);
+	writeStr(8, "WAVE");
+	writeStr(12, "fmt ");
+	view.setUint32(16, 16, true); // PCM chunk size
+	view.setUint16(20, 1, true); // audio format = PCM
+	view.setUint16(22, channels, true);
+	view.setUint32(24, sampleRate, true);
+	view.setUint32(28, byteRate, true);
+	view.setUint16(32, blockAlign, true);
+	view.setUint16(34, bitsPerSample, true);
+	writeStr(36, "data");
+	view.setUint32(40, dataSize, true);
+	new Uint8Array(buffer, 44).set(pcm);
+	return new Uint8Array(buffer);
+}
+
+/**
+ * Convert raw PCM (signed 16-bit little-endian) to MP3 using lamejs.
+ * Gemini TTS returns headerless PCM, typically mono 24kHz.
+ */
+function pcmToMp3(pcm: Uint8Array, sampleRate = 24000, bitrate = 64): Uint8Array {
+	const samples = new Int16Array(pcm.buffer, pcm.byteOffset, pcm.byteLength / 2);
+	const encoder = new lamejs.Mp3Encoder(1, sampleRate, bitrate);
+	const mp3Chunks: Uint8Array[] = [];
+	const chunkSize = 1152;
+
+	for (let i = 0; i < samples.length; i += chunkSize) {
+		const chunk = samples.subarray(i, i + chunkSize);
+		const mp3buf = encoder.encodeBuffer(chunk);
+		if (mp3buf.length > 0) {
+			mp3Chunks.push(new Uint8Array(mp3buf));
+		}
+	}
+
+	const mp3buf = encoder.flush();
+	if (mp3buf.length > 0) {
+		mp3Chunks.push(new Uint8Array(mp3buf));
+	}
+
+	const totalLength = mp3Chunks.reduce((acc, c) => acc + c.length, 0);
+	const result = new Uint8Array(totalLength);
+	let offset = 0;
+	for (const chunk of mp3Chunks) {
+		result.set(chunk, offset);
+		offset += chunk.length;
+	}
+	return result;
+}
+
 // Helper for CORS headers
 function corsHeaders(origin: string | null) {
 	return {
@@ -105,10 +198,21 @@ Current state:
 Please generate the next scene continuing the narrative from the last action in history.
 `;
 
+				// Skeleton injection: pin the current beat, its anchor event, canon,
+				// and (on the finale) the alignment-keyed ending. The LLM varies the
+				// road; the skeleton owns the destination.
+				const beat = beatContext(
+					parseInt(body.sceneId, 10) || 1,
+					body.righteous || 0,
+					body.pragmatic || 0,
+					body.rebel || 0
+				);
+				const fullPrompt = `${userPrompt}\n${beat.promptBlock}`;
+
 				// Try Gemini Story Key first
 				try {
 					const geminiResponse = await fetch(
-						`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_STORY_API_KEY}`,
+						`https://generativelanguage.googleapis.com/v1beta/models/${STORY_MODEL}:generateContent?key=${env.GEMINI_STORY_API_KEY}`,
 						{
 							method: "POST",
 							headers: {
@@ -118,9 +222,10 @@ Please generate the next scene continuing the narrative from the last action in 
 								contents: [
 									{
 										role: "user",
-										parts: [{ text: `${SYSTEM_PROMPT}\n\n${userPrompt}` }]
+										parts: [{ text: `${SYSTEM_PROMPT}\n\n${fullPrompt}` }]
 									}
 								],
+								safetySettings: SAFETY_SETTINGS,
 								generationConfig: {
 									responseMimeType: "application/json",
 									responseSchema: RESPONSE_SCHEMA
@@ -140,10 +245,13 @@ Please generate the next scene continuing the narrative from the last action in 
 						throw new Error("Empty content returned from Gemini");
 					}
 
-					// Verify it parses as valid JSON
-					JSON.parse(contentText);
+					// Parse, then enrich with the skeleton's anchor art + beat metadata.
+					const scene = JSON.parse(contentText);
+					scene.sceneImage = beat.sceneImage;
+					scene.beatId = beat.beatId;
+					scene.beatTitle = beat.beatTitle;
 
-					return new Response(contentText, {
+					return new Response(JSON.stringify(scene), {
 						headers: {
 							"Content-Type": "application/json",
 							...corsHeaders(origin)
@@ -167,7 +275,7 @@ Please generate the next scene continuing the narrative from the last action in 
 							model: "gpt-4o-mini",
 							messages: [
 								{ role: "system", content: SYSTEM_PROMPT },
-								{ role: "user", content: userPrompt }
+								{ role: "user", content: fullPrompt }
 							],
 							response_format: {
 								type: "json_object"
@@ -186,10 +294,13 @@ Please generate the next scene continuing the narrative from the last action in 
 						throw new Error("Empty content returned from OpenAI");
 					}
 
-					// Verify it parses
-					JSON.parse(contentText);
+					// Parse, then enrich with the skeleton's anchor art + beat metadata.
+					const fallbackScene = JSON.parse(contentText);
+					fallbackScene.sceneImage = beat.sceneImage;
+					fallbackScene.beatId = beat.beatId;
+					fallbackScene.beatTitle = beat.beatTitle;
 
-					return new Response(contentText, {
+					return new Response(JSON.stringify(fallbackScene), {
 						headers: {
 							"Content-Type": "application/json",
 							...corsHeaders(origin)
@@ -206,6 +317,76 @@ Please generate the next scene continuing the narrative from the last action in 
 							"Content-Type": "application/json",
 							...corsHeaders(origin)
 						}
+					}
+				);
+			}
+		}
+
+		if (url.pathname === "/api/tts" && request.method === "POST") {
+			try {
+				const body = await request.json() as { text?: string };
+				if (!body.text || !body.text.trim()) {
+					return new Response(JSON.stringify({ error: "Missing 'text' in request body" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
+					});
+				}
+
+				// Mood tags drive delivery style but must not be spoken aloud.
+				const spoken = stripMoodTags(body.text);
+				const stylePrompt = buildStylePrompt(body.text);
+				const ttsPrompt = `${stylePrompt}\n\nNarrate exactly the following text. Do not read any bracketed tags or stage directions aloud:\n\n${spoken}`;
+
+				const ttsResponse = await fetch(
+					`https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${env.GEMINI_TTS_API_KEY}`,
+					{
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							contents: [{ parts: [{ text: ttsPrompt }] }],
+							generationConfig: {
+								responseModalities: ["AUDIO"],
+								speechConfig: {
+									voiceConfig: {
+										prebuiltVoiceConfig: { voiceName: TTS_VOICE },
+									},
+								},
+							},
+						}),
+					}
+				);
+
+				if (!ttsResponse.ok) {
+					throw new Error(`Gemini TTS returned status ${ttsResponse.status}: ${await ttsResponse.text()}`);
+				}
+
+				const data = await ttsResponse.json() as any;
+				const part = data.candidates?.[0]?.content?.parts?.[0];
+				const audioB64 = part?.inlineData?.data;
+				if (!audioB64) {
+					throw new Error("No audio returned from Gemini TTS");
+				}
+
+				// Gemini returns headerless PCM; sample rate is carried in the mimeType (e.g. audio/L16;rate=24000).
+				const mime: string = part?.inlineData?.mimeType || "";
+				const rateMatch = mime.match(/rate=(\d+)/);
+				const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+
+				const mp3 = pcmToMp3(base64ToBytes(audioB64), sampleRate, 64);
+
+				return new Response(mp3, {
+					headers: {
+						"Content-Type": "audio/mpeg",
+						"Cache-Control": "no-store",
+						...corsHeaders(origin),
+					},
+				});
+			} catch (error: any) {
+				return new Response(
+					JSON.stringify({ error: error.message || "Failed to synthesize speech" }),
+					{
+						status: 500,
+						headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
 					}
 				);
 			}

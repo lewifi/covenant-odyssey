@@ -1,917 +1,412 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Covenant Odyssey — Divergent Prophecies | Scene 1: The Burning Bush</title>
-  <meta name="description" content="The kingdoms fracture. Desire burns in tents and palaces alike. Walk your path of fire and flesh. Covenant Odyssey — Divergent Prophecies.">
-
-  <!-- OG / Social -->
-  <meta property="og:title" content="Covenant Odyssey — Divergent Prophecies">
-  <meta property="og:description" content="The kingdoms fracture. Blood will stain the throne before the anointed rises. Choose how you walk this path of fire and flesh.">
-  <meta property="og:image" content="Covenant-Odyssey-Divergent-Prophecies-og.jpg">
-  <meta property="og:type" content="website">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
-
-  <style>
-    /* ── Reset ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; }
-
-    /* ── Z-Layer 0: Full-bleed scene art ── */
-    body {
-      font-family: 'Outfit', sans-serif;
-      color: #fff;
-      background: #0A0A0C;
-      position: relative;
-    }
-
-    #scene-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform-origin: center center;
-      animation: kenBurns 12s ease-in-out infinite alternate;
-      will-change: transform;
-    }
-
-    @keyframes kenBurns {
-      0%   { transform: scale(1)    translate(0px,   0px); }
-      100% { transform: scale(1.08) translate(-18px, -6px); }
-    }
-
-    /* ── Z-Layer 1: Left gradient overlay for text readability ── */
-    #text-gradient {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(
-        to right,
-        rgba(10, 10, 12, 0.82) 0%,
-        rgba(10, 10, 12, 0.55) 38%,
-        rgba(10, 10, 12, 0.10) 60%,
-        transparent 100%
-      );
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    /* ── Z-Layer 1b: Atmospheric dust mote canvas ── */
-    #atmos-canvas {
-      position: fixed;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── Z-Layer 2: Header bar ── */
-    #header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 10;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px 12px 48px;
-    }
-
-    #header-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    #header-logo-img {
-      height: 108px;
-      width: auto;
-      display: block;
-      filter: drop-shadow(0 0 12px rgba(212,175,55,0.4));
-    }
-
-    #header-tagline {
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(9px, 1.5vw, 12px);
-      font-weight: 600;
-      color: rgba(212,175,55,0.7);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    #header-actions {
-      display: none;
-    }
-
-    /* ── Menu toggle (mobile only, hidden on desktop) ── */
-    #menu-btn {
-      display: flex;
-      background: transparent;
-      border: none;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 0;
-      padding: 6px 4px;
-      flex-shrink: 0;
-      margin-left: 16px;
-      transition: opacity 0.15s;
-    }
-    #menu-btn:hover { opacity: 0.75; }
-    /* Three bars — uneven widths like a cuneiform seal mark */
-    #menu-btn .bar {
-      display: block;
-      height: 2px;
-      background: #D4AF37;
-      transition: background 0.15s;
-    }
-    #menu-btn .bar-1 { width: 100%; margin-bottom: 5px; }
-    #menu-btn .bar-2 { width: 62%; margin-bottom: 5px; }
-    #menu-btn .bar-3 { width: 82%; }
-    #menu-btn.open .bar-1 { width: 82%; }
-    #menu-btn.open .bar-2 { width: 100%; }
-    #menu-btn.open .bar-3 { width: 62%; }
-
-    /* ── Mobile action panel (dropdown) ── */
-    #action-panel {
-      position: fixed;
-      top: 76px;
-      right: 0;
-      background: rgba(10,10,12,0.95);
-      border: 2px solid #544338;
-      border-top: none;
-      border-right: none;
-      padding: 10px 12px;
-      z-index: 20;
-      display: flex;
-      flex-direction: row;
-      gap: 8px;
-      align-items: center;
-      pointer-events: none;
-      opacity: 0;
-      transform: translateY(-8px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    #action-panel.open {
-      pointer-events: all;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .header-btn {
-      background: rgba(84, 67, 56, 0.75);
-      border: none;
-      border-left: 3px solid #544338;
-      padding: 6px 10px;
-      font-size: 18px;
-      cursor: pointer;
-      color: #E2E2E9;
-      border-radius: 0;
-      transition: border-left-color 0.15s, background 0.15s, color 0.15s;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-    }
-    .header-btn:hover {
-      border-left-color: #D4AF37;
-      background: rgba(133, 106, 30, 0.75);
-      color: #D4AF37;
-    }
-    .header-btn.tts-active {
-      border-left-color: #D4AF37;
-      background: rgba(133, 106, 30, 0.75);
-      color: #D4AF37;
-    }
-
-    #chapter-badge {
-      background: rgba(10, 10, 12, 0.75);
-      border: none;
-      border-left: 3px solid #D4AF37;
-      padding: 6px 12px;
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      color: #D4AF37;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    /* ── Z-Layer 3: Story zone — transparent pointer-events pass-through ── */
-    #story-zone {
-      position: fixed;
-      inset: 0;
-      z-index: 3;
-      pointer-events: none;
-      overflow: visible;
-    }
-
-    /* ── Stone Tablet: draggable text surface ── */
-    #story-tablet {
-      position: fixed;
-      top: 118px;
-      left: 24px;
-      width: 46vw;
-      height: calc(100vh - 178px);
-      z-index: 5;
-      cursor: grab;
-      user-select: none;
-      pointer-events: all;
-      background: url('Tablet.png') center center / 100% 100% no-repeat;
-      filter: drop-shadow(0 8px 32px rgba(0,0,0,0.55));
-      display: flex;
-      flex-direction: column;
-      transition: filter 0.2s;
-    }
-    #story-tablet.dragging {
-      cursor: grabbing;
-      filter: drop-shadow(0 14px 52px rgba(0,0,0,0.75));
-    }
-
-    /* Inner text area — inset from rough stone edges */
-    #story-inner {
-      padding: 64px 72px 72px 76px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    #scene-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(17px, 2.2vw, 26px);
-      font-weight: 800;
-      color: #1A0D06;
-      letter-spacing: 0.5px;
-      text-shadow: none;
-      margin-bottom: 8px;
-      line-height: 1.2;
-    }
-
-    #scene-divider {
-      width: 52px;
-      height: 2px;
-      background: #8B6914;
-      margin-bottom: 16px;
-      flex-shrink: 0;
-    }
-
-    /* ── Burn-in: text reveals as fire etching into stone ── */
-    @keyframes burnIn {
-      0%   { opacity: 0.85; color: #FF8000;
-             text-shadow: 0 0 20px #FF5500, 0 0 40px #FF2200, 0 0 60px #FF0000; }
-      14%  { opacity: 1; color: #E06000;
-             text-shadow: 0 0 14px #CC4400, 0 0 28px #AA2200; }
-      55%  { color: #7A3010; text-shadow: 0 0 5px rgba(160,70,20,0.4); }
-      100% { color: #2C1810; text-shadow: none; }
-    }
-    @keyframes burnInDivine {
-      0%   { opacity: 0.85; color: #FFFFFF;
-             text-shadow: 0 0 30px #FFD700, 0 0 60px #FFAA00, 0 0 90px #FF6600;
-             border-left-color: #FF8800; }
-      16%  { opacity: 1; color: #FFE040;
-             text-shadow: 0 0 20px #FFB800, 0 0 40px #FF8800;
-             border-left-color: #FFB800; }
-      65%  { color: #A0720A; text-shadow: 0 0 5px rgba(200,140,10,0.4);
-             border-left-color: #CC9A14; }
-      100% { color: #6B4D0A; text-shadow: none; border-left-color: #D4AF37; }
-    }
-
-    #scene-body {
-      overflow-y: auto;
-      scrollbar-width: none;
-    }
-    #scene-body::-webkit-scrollbar { display: none; }
-
-    /* Each sentence is its own element */
-    .sentence {
-      display: block;
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(12px, 1.2vw, 15px);
-      font-weight: 700;
-      line-height: 1.75;
-      margin-bottom: 6px;
-      opacity: 0;
-      transition: color 0.4s ease, opacity 0.4s ease;
-      text-shadow: none;
-      color: #2C1810;
-    }
-
-    /* Reveal: fire burns text into stone */
-    .sentence.revealed {
-      animation: burnIn 1.2s ease-out forwards;
-    }
-    .sentence.quote.revealed {
-      animation: burnInDivine 1.5s ease-out forwards;
-    }
-
-    /* Spoken (already read) — faded inscription */
-    .sentence.spoken {
-      opacity: 0.6;
-      color: #6B4F3A;
-    }
-
-    /* Quote spoken — divine voice stays warm gold */
-    .sentence.quote.spoken {
-      opacity: 0.8;
-      color: #7A5C10;
-    }
-
-    /* Current (being read now) — gold shimmer tuned for stone surface */
-    .sentence.current {
-      opacity: 1;
-      font-weight: 700;
-      color: transparent;
-      background: linear-gradient(
-        120deg,
-        #8B6914 0%,
-        #C9950A 25%,
-        #D4AF37 50%,
-        #C9950A 75%,
-        #8B6914 100%
-      );
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: sentence-shimmer 3.5s linear infinite;
-      filter: drop-shadow(0 1px 3px rgba(160,120,10,0.6));
-      text-shadow: none;
-    }
-
-    @keyframes sentence-shimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* Quote styling */
-    .sentence.quote {
-      font-style: italic;
-      border-left: 3px solid #D4AF37;
-      padding-left: 12px;
-      margin-top: 8px;
-    }
-
-    /* Persistent emphasis shimmer - survives TTS read-along */
-    mark.em {
-      background: linear-gradient(
-        120deg,
-        #D4AF37 0%,
-        #fff8dc 40%,
-        #ffffff 50%,
-        #fff8dc 60%,
-        #D4AF37 100%
-      );
-      background-size: 250% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: em-shimmer 5s linear infinite;
-      filter: drop-shadow(0 1px 4px rgba(212,175,55,0.7));
-      font-style: inherit;
-      font-weight: 700;
-      background-color: transparent;
-    }
-    /* Override: when parent sentence is .current, em stays bright white-gold not mid-gold */
-    .sentence.current mark.em {
-      background: linear-gradient(
-        120deg,
-        #ffffff 0%,
-        #fffbe6 40%,
-        #ffffff 50%,
-        #fffbe6 60%,
-        #ffffff 100%
-      );
-      background-size: 250% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      animation: em-shimmer 3s linear infinite;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
-    }
-    @keyframes em-shimmer {
-      0%   { background-position: 250% 0; }
-      100% { background-position: -250% 0; }
-    }
-
-    /* ── Z-Layer 4: Footer ── (stats, centred) */
-    #footer {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 10;
-      padding: 10px 20px 18px;
-    }
-
-    /* ── Z-Layer 4: Choices ── (right 50%, same vertical bounds as story zone) */
-    #choices {
-      position: fixed;
-      left: 52%;
-      right: 2%;
-      top: 132px;
-      bottom: 60px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-around;
-      align-items: flex-start;
-      pointer-events: none;
-    }
-
-    .choice-btn {
-      background: rgba(35, 35, 51, 0.75);
-      border: none;
-      border-left: 3px solid #6A6A7A;
-      padding: 10px 14px;
-      border-radius: 0;
-      cursor: pointer;
-      pointer-events: all;
-      color: #E2E2E9;
-      font-family: 'Outfit', sans-serif;
-      font-size: clamp(12px, 1.2vw, 14px);
-      font-weight: 600;
-      text-align: left;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      line-height: 1.4;
-      width: fit-content;
-      max-width: 42vw;
-      opacity: 0;
-      transform: translateX(20px);
-      transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.2s, background 0.2s, box-shadow 0.3s;
-    }
-
-    /* Stagger each choice with a slight left indent for visual rhythm */
-    .choice-btn:nth-child(1) { margin-left: 0; }
-    .choice-btn:nth-child(2) { margin-left: 24px; }
-    .choice-btn:nth-child(3) { margin-left: 12px; }
-
-    /* Safety net: cap choice text at 2 lines regardless of Gemini output length */
-    .choice-btn span:first-child {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .choice-btn.revealed {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .choice-btn:hover {
-      border-left-color: #D4AF37;
-      background: rgba(84, 67, 56, 0.75);
-      box-shadow: 0 0 18px rgba(212, 175, 55, 0.35), 0 0 6px rgba(212, 175, 55, 0.2);
-    }
-
-    .choice-badge {
-      font-family: 'Courier New', monospace;
-      font-size: 10px;
-      font-weight: 700;
-      color: #D4AF37;
-      background: rgba(212, 175, 55, 0.12);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      padding: 3px 7px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* Alignment stats - centred */
-    #alignment-row {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding-top: 4px;
-    }
-
-    .alignment-stat {
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      cursor: help;
-      position: relative;
-    }
-
-    /* Custom tooltip */
-    .alignment-stat::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(10, 10, 12, 0.95);
-      border: 1px solid #544338;
-      color: #E2E2E9;
-      font-family: 'Outfit', sans-serif;
-      font-size: 11px;
-      font-weight: 400;
-      letter-spacing: 0;
-      white-space: nowrap;
-      padding: 5px 10px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-      z-index: 99;
-    }
-    .alignment-stat:hover::after {
-      opacity: 1;
-    }
-    /* Last stat tooltip opens leftward to avoid right-edge clip */
-    .alignment-stat:last-child::after {
-      left: auto;
-      right: 0;
-      transform: translateX(0);
-    }
-
-    /* Choice selection flash */
-    @keyframes choiceSelect {
-      0%   { box-shadow: 0 0 0 rgba(212,175,55,0); }
-      40%  { box-shadow: 0 0 32px rgba(212,175,55,0.7); border-color: #D4AF37; }
-      100% { box-shadow: 0 0 0 rgba(212,175,55,0); opacity: 0; transform: translateX(-10px); }
-    }
-    .choice-btn.selected {
-      animation: choiceSelect 0.6s ease forwards;
-    }
-
-    /* ── Mobile: stacking layout (max-width: 768px) ── */
-    @media (max-width: 768px) {
-
-      /* Header: smaller logo, tighter padding */
-      #header {
-        padding: 10px 12px 10px 16px;
-      }
-      #header-brand { gap: 10px; }
-      #header-logo-img { height: 56px; }
-      #header-tagline { font-size: 9px; letter-spacing: 2px; }
-      #header-actions { gap: 4px; }
-      .header-btn { width: 32px; height: 32px; font-size: 16px; }
-      #chapter-badge { font-size: 10px; padding: 5px 8px; }
-
-      /* Gradient: atmospheric only — tablet handles text area */
-      #text-gradient {
-        width: 100%;
-        background: linear-gradient(
-          to bottom,
-          rgba(10,10,12,0.7) 0%,
-          transparent 30%,
-          transparent 70%,
-          rgba(10,10,12,0.7) 100%
-        );
-      }
-
-      /* Tablet: wider, top-anchored on mobile */
-      #story-tablet {
-        width: 88vw;
-        left: 6vw;
-        top: 76px;
-        height: auto;
-        max-height: 48vh;
-      }
-      #story-inner {
-        padding: 44px 48px 48px 52px;
-      }
-
-      /* Choices: full-width, stacked at bottom above stats */
-      #choices {
-        left: 0;
-        right: 0;
-        top: auto;
-        bottom: 48px;
-        height: auto;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: flex-start;
-        padding: 0 16px;
-        gap: 8px;
-        pointer-events: none;
-      }
-
-      /* Choice buttons: fit-content, no stagger on mobile */
-      .choice-btn {
-        font-size: 12px;
-        padding: 10px 12px;
-        max-width: 92vw;
-        transform: translateY(12px);
-      }
-      .choice-btn.revealed { transform: translateY(0); }
-      .choice-btn:nth-child(1),
-      .choice-btn:nth-child(2),
-      .choice-btn:nth-child(3) { margin-left: 0; }
-
-      /* Stats footer: stays centred at bottom */
-      #footer { padding: 8px 16px 12px; }
-
-      /* Tooltip for last stat: stay centred on mobile */
-      .alignment-stat:last-child::after {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-      }
-
-      /* Show action panel when open */
-      #action-panel { top: 76px; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Z-Layer 0: Background -->
-  <img id="scene-bg" src="Kingdoms-and-Prophets-Moses-Tree-Fire.jpg" alt="">
-
-  <!-- Z-Layer 1: Text gradient overlay -->
-  <div id="text-gradient"></div>
-
-  <!-- Z-Layer 1b: Atmospheric dust mote canvas -->
-  <canvas id="atmos-canvas"></canvas>
-
-  <!-- Z-Layer 2: Header -->
-  <header id="header">
-    <div id="header-brand">
-      <img id="header-logo-img" src="logo.png" alt="Covenant Odyssey - Divergent Prophecies">
-      <span id="header-tagline">Divergent Prophecies</span>
-    </div>
-    <!-- Desktop: inline actions -->
-    <div id="header-actions">
-      <button class="header-btn" title="Save"><i class="ri-save-line"></i></button>
-      <button class="header-btn" title="Load"><i class="ri-folder-open-line"></i></button>
-      <button class="header-btn tts-active" id="tts-btn" title="Toggle narration"><i class="ri-volume-up-line" id="tts-icon"></i></button>
-      <button class="header-btn" title="Settings"><i class="ri-settings-3-line"></i></button>
-      <div id="chapter-badge"><i class="ri-bookmark-line"></i> Ch. 1</div>
-    </div>
-    <!-- Mobile: seal-mark toggle -->
-    <button id="menu-btn" title="Menu" aria-label="Open menu">
-      <span class="bar bar-1"></span>
-      <span class="bar bar-2"></span>
-      <span class="bar bar-3"></span>
-    </button>
-  </header>
-
-  <!-- Mobile action panel (dropdown) -->
-  <div id="action-panel">
-    <button class="header-btn" title="Save"><i class="ri-save-line"></i></button>
-    <button class="header-btn" title="Load"><i class="ri-folder-open-line"></i></button>
-    <button class="header-btn tts-active" id="tts-btn-m" title="Toggle narration"><i class="ri-volume-up-line"></i></button>
-    <button class="header-btn" title="Settings"><i class="ri-settings-3-line"></i></button>
-    <div id="chapter-badge-m" style="background:rgba(10,10,12,0.75);border:2px solid #544338;padding:5px 10px;font-family:'Courier New',monospace;font-size:10px;font-weight:700;color:#D4AF37;letter-spacing:1px;text-transform:uppercase;"><i class="ri-bookmark-line"></i> Ch. 1</div>
-  </div>
-
-  <!-- Z-Layer 3: Story zone (transparent) -->
-  <section id="story-zone">
-    <!-- Stone tablet — draggable. Drag from title/stone border; text body remains scrollable -->
-    <div id="story-tablet" title="Drag to reposition">
-      <div id="story-inner">
-        <h1 id="scene-title">The Burning Bush</h1>
-        <div id="scene-divider"></div>
-        <div id="scene-body">
-          <span class="sentence" data-idx="0">The golden dawn light cuts through the dust of the wadi.</span>
-          <span class="sentence" data-idx="1">Your sheep bleat nervously.</span>
-          <span class="sentence" data-idx="2">Before you, the bush burns fiercely, tongues of flame wrapping the branches without consuming them.</span>
-          <span class="sentence" data-idx="3">Heat radiates against your skin, carrying the scent of scorched earth and something sacred.</span>
-          <span class="sentence" data-idx="4">The voice rolls over you like thunder wrapped in mercy, echoing covenants made with flawed men before you.</span>
-          <span class="sentence quote" data-idx="5">"Eliab, son of Jesse. The kingdoms fracture. Blood will stain the throne before the anointed rises. <mark class="em">Choose how you will walk this path of fire and flesh.</mark>"</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Z-Layer 4: Choices - floating across right 50% -->
-  <div id="choices">
-    <button class="choice-btn" data-alignment="Righteous">
-      <span>Fall to the ground in reverence - "Speak, Lord. Your servant is listening."</span>
-      <span class="choice-badge">+Righteous</span>
-    </button>
-    <button class="choice-btn" data-alignment="Pragmatic">
-      <span>Step closer through the heat - "Why me, amid such lust, war, and betrayal?"</span>
-      <span class="choice-badge">+Pragmatic</span>
-    </button>
-    <button class="choice-btn" data-alignment="Rebel">
-      <span>Draw near boldly, heart pounding, recalling the passionate failings of the patriarchs.</span>
-      <span class="choice-badge">+Rebel</span>
-    </button>
-  </div>
-
-  <!-- Z-Layer 4: Footer - alignment stats only, bottom right -->
-  <footer id="footer">
-    <div id="alignment-row">
-      <span class="alignment-stat" style="color:#68D391" id="stat-r" data-tooltip="Righteous - obedience to covenant, prophetic faith, divine will"><i class="ri-scales-3-line"></i> R:0</span>
-      <span class="alignment-stat" style="color:#D4AF37" id="stat-p" data-tooltip="Pragmatic - survival, strategy, ambition, human reason"><i class="ri-shield-line"></i> P:0</span>
-      <span class="alignment-stat" style="color:#C0C0C0" id="stat-e" data-tooltip="Rebel - passion, defiance, flawed desire, chaos"><i class="ri-sword-line"></i> E:0</span>
-    </div>
-  </footer>
-
-  <script>
-    // ── Sentence reveal engine ──
-    const sentences = Array.from(document.querySelectorAll('.sentence'));
-    const choices = Array.from(document.querySelectorAll('.choice-btn'));
-    let currentIdx = -1;
-
-    function revealNext() {
-      const prev = currentIdx;
-      currentIdx++;
-
-      // Mark previous as spoken
-      if (prev >= 0 && sentences[prev]) {
-        sentences[prev].classList.remove('current');
-        sentences[prev].classList.add('spoken');
-      }
-
-      if (currentIdx < sentences.length) {
-        const el = sentences[currentIdx];
-        el.classList.add('revealed');
-
-        // Let the fire burn before gold shimmer takes over (800ms matches ~67% of burnIn)
-        setTimeout(() => {
-          el.classList.add('current');
-          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-          // Auto-advance to next sentence after reading time
-          const words = el.textContent.trim().split(/\s+/).length;
-          const readTime = Math.max(900, words * 280);
-          setTimeout(revealNext, readTime);
-        }, 800);
-      } else {
-        // All sentences done — reveal choices staggered
-        choices.forEach((btn, i) => {
-          setTimeout(() => btn.classList.add('revealed'), i * 160);
-        });
-      }
-    }
-
-    // Start after page settles
-    setTimeout(revealNext, 400);
-
-    // ── Choice interaction ──
-    let stats = { r: 0, p: 0, e: 0 };
-
-    choices.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const alignment = btn.dataset.alignment;
-        btn.classList.add('selected');
-
-        if (alignment === 'Righteous') stats.r += 5;
-        if (alignment === 'Pragmatic') stats.p += 5;
-        if (alignment === 'Rebel')     stats.e += 5;
-
-        document.getElementById('stat-r').innerHTML = `<i class="ri-scales-3-line"></i> R:${stats.r}`;
-        document.getElementById('stat-p').innerHTML = `<i class="ri-shield-line"></i> P:${stats.p}`;
-        document.getElementById('stat-e').innerHTML = `<i class="ri-sword-line"></i> E:${stats.e}`;
-
-        // After selection, fade to next scene (placeholder)
-        setTimeout(() => {
-          choices.forEach(b => b.style.opacity = '0.3');
-          // In production: fetch next scene from Worker API
-        }, 700);
-      });
-    });
-
-    // ── TTS mute toggle ──
-    const ttsBtn = document.getElementById('tts-btn');
-    let ttsOn = true;
-    ttsBtn.addEventListener('click', () => {
-      ttsOn = !ttsOn;
-      document.getElementById('tts-icon').className = ttsOn ? 'ri-volume-up-line' : 'ri-volume-mute-line';
-      ttsBtn.classList.toggle('tts-active', ttsOn);
-    });
-
-    // ── Mobile menu toggle ──
-    const menuBtn = document.getElementById('menu-btn');
-    const actionPanel = document.getElementById('action-panel');
-    menuBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isOpen = menuBtn.classList.toggle('open');
-      actionPanel.classList.toggle('open', isOpen);
-    });
-    // Close when tapping outside
-    document.addEventListener('click', (e) => {
-      if (!menuBtn.contains(e.target) && !actionPanel.contains(e.target)) {
-        menuBtn.classList.remove('open');
-        actionPanel.classList.remove('open');
-      }
-    });
-    // ── Cinematic Lens: Atmospheric dust mote engine ──
-    (function() {
-      const canvas = document.getElementById('atmos-canvas');
-      const ctx = canvas.getContext('2d');
-
-      // Scene atmosphere presets — call setAtmosphere() when a new scene loads
-      // Desert / fire / dawn:  { r:212, g:175, b:55  }  warm gold
-      // Night / moonlit:       { r:160, g:190, b:220 }  cold blue
-      // Storm / ash:           { r:140, g:140, b:150 }  muted grey
-      // Rain / mist:           { r:180, g:200, b:210 }  cool silver
-      let atmosColor = { r: 212, g: 175, b: 55 }; // default: warm gold (desert/fire)
-
-      window.setAtmosphere = function(color) {
-        atmosColor = color;
-      };
-
-      const PARTICLE_COUNT = 60;
-      const particles = [];
-
-      function resize() {
-        canvas.width  = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-
-      function makeParticle(randomY) {
-        return {
-          x:       Math.random() * canvas.width,
-          y:       randomY !== undefined ? randomY : Math.random() * canvas.height,
-          radius:  Math.random() * 1.8 + 0.8,           // 0.8 - 2.6 px
-          opacity: Math.random() * 0.28 + 0.20,          // 0.20 - 0.48
-          vx:      0.20 + Math.random() * 0.15,
-          vy:      -(0.05 + Math.random() * 0.08),
-        };
-      }
-
-      resize();
-      window.addEventListener('resize', () => { resize(); });
-      for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(makeParticle());
-
-      function tick() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const { r, g, b } = atmosColor;
-
-        for (const p of particles) {
-          p.x += p.vx;
-          p.y += p.vy;
-
-          // Wrap: when off right edge, re-enter from left at a random y
-          if (p.x > canvas.width  + 4) { p.x = -4; p.y = Math.random() * canvas.height; }
-          // Wrap: when off top edge, re-enter from bottom
-          if (p.y < -4)                { p.y = canvas.height + 4; p.x = Math.random() * canvas.width; }
-
-          ctx.beginPath();
-          // Radial gradient gives each mote a feathered, glowing edge
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          grad.addColorStop(0,   `rgba(${r},${g},${b},${p.opacity})`);
-          grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
-          ctx.fill();
-        }
-
-        requestAnimationFrame(tick);
-      }
-
-      tick();
-    })();
-
-    // ── Stone Tablet: drag to reposition ──
-    (function() {
-      const tablet = document.getElementById('story-tablet');
-      const body   = document.getElementById('scene-body');
-      let down = false, sx, sy, ox, oy;
-
-      function onStart(e) {
-        down = true;
-        const pt = e.touches ? e.touches[0] : e;
-        sx = pt.clientX;
-        sy = pt.clientY;
-        const r = tablet.getBoundingClientRect();
-        ox = r.left;
-        oy = r.top;
-        tablet.classList.add('dragging');
-        e.preventDefault();
-      }
-
-      function onMove(e) {
-        if (!down) return;
-        const pt = e.touches ? e.touches[0] : e;
-        // Clamp so tablet stays partially on screen
-        const newLeft = Math.max(-tablet.offsetWidth * 0.5, Math.min(window.innerWidth - 80, ox + pt.clientX - sx));
-        const newTop  = Math.max(0, Math.min(window.innerHeight - 80, oy + pt.clientY - sy));
-        tablet.style.left = newLeft + 'px';
-        tablet.style.top  = newTop  + 'px';
-        e.preventDefault();
-      }
-
-      function onEnd() {
-        down = false;
-        tablet.classList.remove('dragging');
-      }
-
-      tablet.addEventListener('mousedown',  onStart);
-      tablet.addEventListener('touchstart', onStart, { passive: false });
-      document.addEventListener('mousemove',  onMove);
-      document.addEventListener('touchmove',  onMove, { passive: false });
-      document.addEventListener('mouseup',   onEnd);
-      document.addEventListener('touchend',  onEnd);
-    })();
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html  lang="en"><head><title data-rh="true">Covenant Odyssey - Divergent Prophecies</title><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Covenant Odyssey - Divergent Prophecies</title><meta name="description" content="The kingdoms fracture. You are Eliab, and how you walk the path of fire and flesh is yours to decide. An interactive branching narrative."/><meta property="og:title" content="Covenant Odyssey - Divergent Prophecies"/><meta property="og:description" content="The kingdoms fracture. Blood will stain the throne before the anointed rises. Your choices write the prophecy."/><meta property="og:image" content="/Covenant-Odyssey-Divergent-Prophecies-og.jpg"/><meta property="og:type" content="website"/><style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}</style><style id="react-native-stylesheet">[stylesheet-group="0"]{}
+body{margin:0;}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0;}
+html{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-webkit-search-results-button,input::-webkit-search-results-decoration{display:none;}
+[stylesheet-group="1"]{}
+.css-11aywtz{-moz-appearance:textfield;-webkit-appearance:none;background-color:rgba(0,0,0,0.00);border-bottom-left-radius:0px;border-bottom-right-radius:0px;border-top-left-radius:0px;border-top-right-radius:0px;border:0 solid black;box-sizing:border-box;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0px;padding:0px;resize:none;}
+.css-146c3p1{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:rgba(0,0,0,1.00);display:inline;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;list-style:none;margin:0px;padding:0px;position:relative;text-align:start;text-decoration:none;white-space:pre-wrap;word-wrap:break-word;}
+.css-1jxf684{background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;color:inherit;display:inline;font:inherit;list-style:none;margin:0px;padding:0px;position:relative;text-align:inherit;text-decoration:none;white-space:inherit;word-wrap:break-word;}
+.css-9pa8cd{bottom:0px;height:100%;left:0px;opacity:0;position:absolute;right:0px;top:0px;width:100%;z-index:-1;}
+.css-g5y9jx{align-content:flex-start;align-items:stretch;background-color:rgba(0,0,0,0.00);border:0 solid black;box-sizing:border-box;display:flex;flex-basis:auto;flex-direction:column;flex-shrink:0;list-style:none;margin:0px;min-height:0px;min-width:0px;padding:0px;position:relative;text-decoration:none;z-index:0;}
+[stylesheet-group="2"]{}
+.r-11mg6pl{border-bottom-color:rgba(255,255,255,1.00);border-left-color:rgba(255,255,255,1.00);border-right-color:rgba(255,255,255,1.00);border-top-color:rgba(255,255,255,1.00);}
+.r-13awgt0{flex:1;}
+.r-1awa8pu{border-bottom-color:rgba(101,119,134,1.00);border-left-color:rgba(101,119,134,1.00);border-right-color:rgba(101,119,134,1.00);border-top-color:rgba(101,119,134,1.00);}
+.r-1bq2mok{margin:3px;}
+.r-1d4xg89{border-bottom-color:rgba(170,184,194,1.00);border-left-color:rgba(170,184,194,1.00);border-right-color:rgba(170,184,194,1.00);border-top-color:rgba(170,184,194,1.00);}
+.r-1dzdj1l{border-bottom-left-radius:10px;border-bottom-right-radius:10px;border-top-left-radius:10px;border-top-right-radius:10px;}
+.r-1f0042m{border-bottom-left-radius:5px;border-bottom-right-radius:5px;border-top-left-radius:5px;border-top-right-radius:5px;}
+.r-1fowp7b{border-bottom-color:rgba(212,175,55,1.00);border-left-color:rgba(212,175,55,1.00);border-right-color:rgba(212,175,55,1.00);border-top-color:rgba(212,175,55,1.00);}
+.r-1j16mh1{border-bottom-left-radius:100%;border-bottom-right-radius:100%;border-top-left-radius:100%;border-top-right-radius:100%;}
+.r-1jkafct{border-bottom-left-radius:2px;border-bottom-right-radius:2px;border-top-left-radius:2px;border-top-right-radius:2px;}
+.r-1jyn79y{border-bottom-color:rgba(0,150,136,1.00);border-left-color:rgba(0,150,136,1.00);border-right-color:rgba(0,150,136,1.00);border-top-color:rgba(0,150,136,1.00);}
+.r-1pcd2l5{padding:20px;}
+.r-1phboty{border-bottom-style:solid;border-left-style:solid;border-right-style:solid;border-top-style:solid;}
+.r-1q9bdsx{border-bottom-left-radius:12px;border-bottom-right-radius:12px;border-top-left-radius:12px;border-top-right-radius:12px;}
+.r-1qsk4np{overflow-x:clip;overflow-y:clip;}
+.r-1rvyss1{border-bottom-color:rgba(255,255,255,0.20);border-left-color:rgba(255,255,255,0.20);border-right-color:rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.20);}
+.r-1sp51qo{padding:10px;}
+.r-1udh08x{overflow-x:hidden;overflow-y:hidden;}
+.r-1uu6nss{padding:5px;}
+.r-1xfd6ze{border-bottom-left-radius:8px;border-bottom-right-radius:8px;border-top-left-radius:8px;border-top-right-radius:8px;}
+.r-494qqr{padding:32px;}
+.r-4a18lf{border-bottom-color:rgba(255,0,0,1.00);border-left-color:rgba(255,0,0,1.00);border-right-color:rgba(255,0,0,1.00);border-top-color:rgba(255,0,0,1.00);}
+.r-60ke3l{border-bottom-color:rgba(0,128,0,1.00);border-left-color:rgba(0,128,0,1.00);border-right-color:rgba(0,128,0,1.00);border-top-color:rgba(0,128,0,1.00);}
+.r-6t2glc{border-bottom-left-radius:40px;border-bottom-right-radius:40px;border-top-left-radius:40px;border-top-right-radius:40px;}
+.r-9x6qib{border-bottom-color:rgba(204,214,221,1.00);border-left-color:rgba(204,214,221,1.00);border-right-color:rgba(204,214,221,1.00);border-top-color:rgba(204,214,221,1.00);}
+.r-crgep1{margin:0px;}
+.r-d045u9{border-bottom-width:2px;border-left-width:2px;border-right-width:2px;border-top-width:2px;}
+.r-d23pfw{padding:24px;}
+.r-edyy15{padding:8px;}
+.r-fx7oqy{border-bottom-color:rgba(0,0,255,1.00);border-left-color:rgba(0,0,255,1.00);border-right-color:rgba(0,0,255,1.00);border-top-color:rgba(0,0,255,1.00);}
+.r-krxsd3{display:-webkit-box;}
+.r-rs99b7{border-bottom-width:1px;border-left-width:1px;border-right-width:1px;border-top-width:1px;}
+.r-t60dpp{padding:0px;}
+.r-wg31gx{border-bottom-color:rgba(49,53,56,1.00);border-left-color:rgba(49,53,56,1.00);border-right-color:rgba(49,53,56,1.00);border-top-color:rgba(49,53,56,1.00);}
+.r-xoduu5{display:inline-flex;}
+.r-ywje51{margin:auto;}
+.r-z2wwpe{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-top-left-radius:4px;border-top-right-radius:4px;}
+[stylesheet-group="2.1"]{}
+.r-11f147o{padding-bottom:8px;padding-top:8px;}
+.r-17q4wm6{margin-left:5px;margin-right:5px;}
+.r-184id4b{margin-bottom:12px;margin-top:12px;}
+.r-1d7mnkm{padding-bottom:15px;padding-top:15px;}
+.r-1e084wi{padding-left:0px;padding-right:0px;}
+.r-1ml3abn{padding-bottom:14px;padding-top:14px;}
+.r-1mmae3n{padding-bottom:12px;padding-top:12px;}
+.r-1ntr0p{padding-left:5px;padding-right:5px;}
+.r-1rsorjc{padding-left:36px;padding-right:36px;}
+.r-1ubuhtd{padding-left:10px;padding-right:10px;}
+.r-1yd117h{padding-bottom:7px;padding-top:7px;}
+.r-3o4zer{padding-left:12px;padding-right:12px;}
+.r-3pj75a{padding-left:16px;padding-right:16px;}
+.r-cxgwc0{padding-left:24px;padding-right:24px;}
+.r-f8sm7e{margin-left:auto;margin-right:auto;}
+.r-is05cd{padding-left:8px;padding-right:8px;}
+.r-jdiy1a{margin-left:11px;margin-right:11px;}
+.r-jusfrs{margin-left:12px;margin-right:12px;}
+.r-n5f61p{margin-bottom:3px;margin-top:3px;}
+.r-n7gxbd{padding-left:4px;padding-right:4px;}
+.r-u9wvl5{padding-left:20px;padding-right:20px;}
+.r-ugi1tw{padding-left:5%;padding-right:5%;}
+.r-w7s2jr{padding-bottom:16px;padding-top:16px;}
+.r-ytbthy{padding-bottom:10px;padding-top:10px;}
+[stylesheet-group="2.2"]{}
+.r-10s2tm5{left:0%;}
+.r-16o8guy{right:100%;}
+.r-1a11zyx{margin-right:12px;}
+.r-1cwvpvk{margin-left:12px;}
+.r-1e97lx8{margin-right:3px;}
+.r-1euzeng{padding-left:24px;}
+.r-1g4tz6n{margin-right:-14.5px;}
+.r-1h31txp{padding-right:16px;}
+.r-1lhn9r{margin-left:-14.5px;}
+.r-1sqnqi2{margin-left:3px;}
+.r-1vl2501{padding-right:24px;}
+.r-9mo606{margin-right:10px;}
+.r-c59us2{left:-3px;}
+.r-dqe1q{right:0%;}
+.r-qb41rp{margin-right:5px;}
+.r-rci37q{left:100%;}
+.r-uhung1{margin-left:10px;}
+.r-vpmibe{right:-3px;}
+.r-w67my2{padding-left:16px;}
+.r-wizibn{margin-left:5px;}
+[stylesheet-group="3"]{}
+.r-105ug2t{pointer-events:auto!important;}
+.r-10ptun7{height:16px;}
+.r-10v3vxq{transform:scaleX(-1);}
+.r-10x49cs{font-size:10px;}
+.r-10xqauy{padding-top:env(safe-area-inset-top);}
+.r-1107lc{font-family:'Outfit', sans-serif;}
+.r-117bsoe{margin-bottom:20px;}
+.r-11fsuwv{height:78px;}
+.r-11j9u27{visibility:hidden;}
+.r-11mpjr4{background-color:rgba(223,223,223,1.00);}
+.r-11udlyb{background-color:rgba(0,150,136,1.00);}
+.r-11v9fek{min-width:180px;}
+.r-11yh6sk{overflow-x:hidden;}
+.r-121vyqi{background-color:rgba(133,106,30,0.40);}
+.r-12f6czt{top:17px;}
+.r-12vffkv>* {pointer-events:auto;}
+.r-12vffkv{pointer-events:none!important;}
+.r-135wba7{line-height:24px;}
+.r-13aq9py{animation-name:r-1iq689l;}
+.r-13cpzu8{color:rgba(138,138,158,1.00);}
+.r-13qz1uu{width:100%;}
+.r-13tjlyg{transition-duration:0.1s;}
+.r-13z8rhp{font-family:'Courier New', monospace;}
+.r-1472mwg{height:24px;}
+.r-14gqq1x{margin-top:4px;}
+.r-14lw9ot{background-color:rgba(255,255,255,1.00);}
+.r-14sbq61{background-color:rgba(33,150,243,1.00);}
+.r-150rngu{-webkit-overflow-scrolling:touch;}
+.r-15zivkp{margin-bottom:4px;}
+.r-16pcm1t{gap:20px;}
+.r-16y2uox{flex-grow:1;}
+.r-173mn98{align-self:flex-end;}
+.r-173mzie{transform:scaleY(-1);}
+.r-1777fci{justify-content:center;}
+.r-17bb2tj{animation-duration:0.75s;}
+.r-17leim2{background-repeat:repeat;}
+.r-17s6mgv{justify-content:flex-end;}
+.r-17tb59b{opacity:0.7;}
+.r-17tloay{opacity:0.6;}
+.r-17u3ijr{background-color:rgba(155,161,166,0.27);}
+.r-184en5c{z-index:1;}
+.r-18jhcye{text-shadow:2px 2px 8px rgba(0,0,0,0.90);}
+.r-18kxxzh{flex-grow:0;}
+.r-18nhz7w{top:-3px;}
+.r-18tzken{width:56px;}
+.r-18u1ve8{color:rgba(255,255,255,0.40);}
+.r-18u37iz{flex-direction:row;}
+.r-19oahor{font-size:64px;}
+.r-19wmn03{width:20px;}
+.r-19z077z{touch-action:none;}
+.r-1a2p6p6{-webkit-text-decoration-style:solid;text-decoration-style:solid;}
+.r-1abnn5w{animation-play-state:paused;}
+.r-1acpoxo{width:36px;}
+.r-1aeu2ri{background-color:rgba(0,0,0,0.88);}
+.r-1aockid{width:40px;}
+.r-1awozwy{align-items:center;}
+.r-1ay1djp{animation-duration:1s;}
+.r-1b43r93{font-size:14px;}
+.r-1c0dvla{left:52%;}
+.r-1c6unfx{forced-color-adjust:none;}
+.r-1c85bru{width:270px;}
+.r-1cmwbt1{gap:8px;}
+.r-1d2f490{left:0px;}
+.r-1d5kdc7{flex-direction:column-reverse;}
+.r-1ddef8g{-webkit-text-decoration-line:underline;text-decoration-line:underline;}
+.r-1dernwh{height:70%;}
+.r-1ei5mc7{cursor:inherit;}
+.r-1enofrn{font-size:12px;}
+.r-1euycsn{flex-direction:row-reverse;}
+.r-1ewcgjf{box-shadow:0px 1px 3px rgba(0,0,0,0.5);}
+.r-1f720gc{width:50%;}
+.r-1ferzrx{background-color:rgba(35,35,51,0.75);}
+.r-1ff274t{text-align:right;}
+.r-1fq1anb{bottom:60px;}
+.r-1g40b8q{z-index:3;}
+.r-1g80hic{opacity:0.8;}
+.r-1ge9hsw{max-width:960px;}
+.r-1ghxqbu{font-variant:tabular-nums;}
+.r-1gkfh8e{font-size:11px;}
+.r-1h0z5md{justify-content:flex-start;}
+.r-1h2t8mc{width:0px;}
+.r-1h5ni8q{color:rgba(44,24,16,1.00);}
+.r-1habvwh{align-items:flex-start;}
+.r-1hlnpa{height:3px;}
+.r-1hxq0ab{padding-left:48px;}
+.r-1i10wst{font-size:18px;}
+.r-1i6wzkk{-moz-transition-property:opacity;-webkit-transition-property:opacity;transition-property:opacity;}
+.r-1i71y14{gap:14px;}
+.r-1ifxtd0{margin-bottom:16px;}
+.r-1ikidpy{letter-spacing:0.5px;}
+.r-1iln25a{word-wrap:normal;}
+.r-1inkyih{font-size:17px;}
+.r-1ipicw7{width:300px;}
+.r-1iusvr4{flex-basis:0px;}
+.r-1janqcz{width:16px;}
+.r-1jiwv9k{box-shadow:0px 0px 12px rgba(212,175,55,0.50);}
+.r-1jkjb{margin-left:8px;}
+.r-1kb76zh{margin-right:8px;}
+.r-1kfrs79{font-weight:600;}
+.r-1kihuf0{align-self:center;}
+.r-1kt6imw{line-height:27px;}
+.r-1ld3bg{top:-4px;}
+.r-1ldzwu0{animation-timing-function:linear;}
+.r-1loqt21{cursor:pointer;}
+.r-1mlmke2{text-shadow:1px 1px 5px rgba(0,0,0,0.70);}
+.r-1mlwlqe{flex-basis:auto;}
+.r-1mrlafo{background-position:0;}
+.r-1muvv40{animation-iteration-count:infinite;}
+.r-1niwhzg{background-color:rgba(0,0,0,0.00);}
+.r-1nlw0im{bottom:8px;}
+.r-1no09lo{margin-top:28px;}
+.r-1nxhmzv{margin-bottom:28px;}
+.r-1ny4l3l{outline-style:none;}
+.r-1ocf4r9{scroll-snap-type:y mandatory;}
+.r-1onu96p{border-curve:continuous;}
+.r-1oszu61{align-items:stretch;}
+.r-1otgn73{touch-action:manipulation;}
+.r-1p0dtai{bottom:0px;}
+.r-1pi2tsx{height:100%;}
+.r-1pm8pkb{font-family:Courier;}
+.r-1qd0xha{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.r-1qulhi1{animation-name:r-1pzkwqh;}
+.r-1r4fvd0{color:rgba(82,169,255,1.00);}
+.r-1r74h94{left:8px;}
+.r-1r8g8re{height:36px;}
+.r-1rkjrah{background-color:rgba(23,23,33,0.75);}
+.r-1rnoaur{overflow-y:auto;}
+.r-1rugd3m{font-family:'Playfair Display', serif;}
+.r-1s3egr7{z-index:100;}
+.r-1sn7ly2{height:54px;}
+.r-1ssbvtb{gap:12px;}
+.r-1sxrcry{background-size:auto;}
+.r-1udbk01{text-overflow:ellipsis;}
+.r-1ui5ee8{font-size:32px;}
+.r-1ulh5tz{border-left-color:rgba(212,175,55,1.00);}
+.r-1vr29t4{font-weight:800;}
+.r-1w2pmg{height:0px;}
+.r-1w6e6rj{flex-wrap:wrap;}
+.r-1wbh5a2{flex-shrink:1;}
+.r-1wfhzrg{height:120px;}
+.r-1wtj0ep{justify-content:space-between;}
+.r-1wyyakw{z-index:-1;}
+.r-1x8o47i{top:92px;}
+.r-1xcajam{position:fixed;}
+.r-1xnzce8{-moz-user-select:text;-webkit-user-select:text;user-select:text;}
+.r-1xpsq9i{box-shadow:0px 3px 3px rgba(0, 0, 0, 0.33);}
+.r-1xzupcd{width:13px;}
+.r-1yef0xd{animation-name:r-11cv4x;}
+.r-1ym3atv{z-index:50;}
+.r-2eszeu::-webkit-scrollbar{display:none}
+.r-2eszeu{scrollbar-width:none;}
+.r-30o5oe{-moz-appearance:none;-ms-appearance:none;-webkit-appearance:none;appearance:none;}
+.r-32tv8s{color:rgba(226,226,233,1.00);}
+.r-356f0p{letter-spacing:0.35px;}
+.r-36ujnk{font-style:italic;}
+.r-37x7q3{color:rgba(160,160,176,1.00);}
+.r-3b0rok{background-color:rgba(23,23,33,0.96);}
+.r-3mc0re{right:8px;}
+.r-3s2u2q{white-space:nowrap;}
+.r-417010{z-index:0;}
+.r-4gszlv{background-size:cover;}
+.r-4v7adb{height:5px;}
+.r-5c6s12{background-color:rgba(10,10,12,1.00);}
+.r-5hecs3{background-color:rgba(212,175,55,1.00);}
+.r-5orghg{width:34px;}
+.r-5oul0u{margin-bottom:8px;}
+.r-60vfwk{min-width:1px;}
+.r-633pao>* {pointer-events:none;}
+.r-633pao{pointer-events:none!important;}
+.r-6dt33c{opacity:1;}
+.r-6gpygo{margin-bottom:12px;}
+.r-6m16eh{width:132px;}
+.r-6taxm2:-ms-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-moz-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::-webkit-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-6taxm2::placeholder{color:var(--placeholderTextColor);opacity:1;}
+.r-726pan{width:31px;}
+.r-76blku{height:21px;}
+.r-7cikom{font-size:inherit;}
+.r-7q8q6z{cursor:default;}
+.r-7s32vr{transform:translateX(20px);}
+.r-89umd1{letter-spacing:3px;}
+.r-8akbws{-webkit-box-orient:vertical;}
+.r-8ay8q1{letter-spacing:0.1px;}
+.r-8fdsdq{z-index:4;}
+.r-8yvsb2{right:2%;}
+.r-97e31f{padding-bottom:env(safe-area-inset-bottom);}
+.r-9daxd3{animation-duration:250ms;}
+.r-a023e6{font-size:15px;}
+.r-a2tzq0{justify-content:space-around;}
+.r-adyw6z{font-size:20px;}
+.r-agouwx{transform:translateZ(0);}
+.r-ah5dr5>* {pointer-events:none;}
+.r-ah5dr5{pointer-events:auto!important;}
+.r-ahxqad{background-color:rgba(84,67,56,0.75);}
+.r-aruset{font-weight:200;}
+.r-b88u0q{font-weight:700;}
+.r-bezmw2{border-left-color:rgba(84,67,56,1.00);}
+.r-bi4vy9{transform:translateY(100%);}
+.r-bt1l66{min-height:20px;}
+.r-buy8e9{overflow-y:hidden;}
+.r-bv2aro{padding-left:env(safe-area-inset-left);}
+.r-bzcxiq{background-color:rgba(133,106,30,0.75);}
+.r-c68hjy{color:rgba(161,161,161,1.00);}
+.r-cpa5s6{scroll-snap-align:start;}
+.r-cqee49{color:rgba(0,0,0,1.00);}
+.r-df896w{max-width:92%;}
+.r-dkge59{background-color:rgba(170,184,194,1.00);}
+.r-dnmrzs{max-width:100%;}
+.r-dqa1tq{width:180px;}
+.r-eafdt9{transition-duration:0.15s;}
+.r-ebwn4k{animation-name:r-q67da2;}
+.r-ehq7j7{background-size:contain;}
+.r-eqz5dr{flex-direction:column;}
+.r-eu3ka{height:40px;}
+.r-evnaw{font-size:22px;}
+.r-f1odvy{margin-bottom:6px;}
+.r-f727ji{padding-left:12px;}
+.r-fdjqy7{text-align:left;}
+.r-g3mlsw{animation-name:r-t2lo5v;}
+.r-gh14nr{width:55%;}
+.r-ghxds0{transform:translateY(0%);}
+.r-gtdqiz{position:-webkit-sticky;position:sticky;}
+.r-h0d30l{height:28px;}
+.r-hbpseb{line-height:22px;}
+.r-hxflta{padding-right:env(safe-area-inset-right);}
+.r-icoktb{opacity:0.5;}
+.r-ipm5af{top:0px;}
+.r-iz080l{max-width:480px;}
+.r-jwli3a{color:rgba(255,255,255,1.00);}
+.r-k200y{align-self:flex-start;}
+.r-kemksi{background-color:rgba(0,0,0,1.00);}
+.r-kizejy{color:rgba(155,161,166,1.00);}
+.r-kls4rr{padding-right:40px;}
+.r-knv0ih{margin-top:8px;}
+.r-l0gwng{width:200px;}
+.r-leqjx2{animation-timing-function:cubic-bezier(0.215, 0.61, 0.355, 1);}
+.r-lltvgl{overflow-x:auto;}
+.r-lpb231{height:168px;}
+.r-lrsllp{width:24px;}
+.r-lrvibr{-moz-user-select:none;-webkit-user-select:none;user-select:none;}
+.r-majxgm{font-weight:500;}
+.r-mcknj5{transform:translateX(0px);}
+.r-mfh4gg{scroll-snap-type:x mandatory;}
+.r-mhe3cw{z-index:10;}
+.r-mro3nb{background-color:rgba(21,23,24,1.00);}
+.r-ms8t9i{border-left-width:3px;}
+.r-n6v787{font-size:13px;}
+.r-njen7d{color:rgba(212,175,55,1.00);}
+.r-o4n3w5{width:23px;}
+.r-ojf8lh{gap:6px;}
+.r-orgf3d{opacity:0;}
+.r-pnoon7{background-color:rgba(10,10,12,0.75);}
+.r-q4m81j{text-align:center;}
+.r-q5oqfz{max-width:80%;}
+.r-qfi6ny{top:30000px;}
+.r-qklmqi{border-bottom-width:1px;}
+.r-qn3fzs{padding-bottom:24px;}
+.r-rba76{background-color:rgba(10,10,12,0.90);}
+.r-rjixqe{line-height:20px;}
+.r-rs94m5{background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcKICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIgogICB4bWxuczpjYz0iaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbnMjIgogICB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiCiAgIHhtbG5zOnN2Zz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgdmVyc2lvbj0iMS4xIgogICB2aWV3Qm94PSIwIDAgMSAxIgogICBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij4KICA8cGF0aAogICAgIGQ9Ik0gMC4wNDAzODA1OSwwLjYyNjc3NjcgMC4xNDY0NDY2MSwwLjUyMDcxMDY4IDAuNDI5Mjg5MzIsMC44MDM1NTMzOSAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IE0gMC4yMTcxNTcyOSwwLjgwMzU1MzM5IDAuODUzNTUzMzksMC4xNjcxNTcyOSAwLjk1OTYxOTQxLDAuMjczMjIzMyAwLjMyMzIyMzMsMC45MDk2MTk0MSB6IgogICAgIGlkPSJyZWN0Mzc4MCIKICAgICBzdHlsZT0iZmlsbDojZmZmZmZmO2ZpbGwtb3BhY2l0eToxO3N0cm9rZTpub25lIiAvPgo8L3N2Zz4K");}
+.r-s62m2j{animation-timing-function:cubic-bezier(0.47, 0, 0.745, 0.715);}
+.r-sfbmgh{z-index:9999;}
+.r-sgbo92{opacity:0.9;}
+.r-so7y2g{line-height:64px;}
+.r-tsynxw{text-transform:uppercase;}
+.r-u6sd8q{background-repeat:no-repeat;}
+.r-u8s1d{position:absolute;}
+.r-u92y06{background-color:rgba(255,165,0,1.00);}
+.r-uaa2di{gap:10px;}
+.r-ubezar{font-size:16px;}
+.r-ud0q2t{letter-spacing:1px;}
+.r-uho16t{font-size:34px;}
+.r-vacyoi{padding-bottom:64px;}
+.r-van48c{caret-color:transparent;}
+.r-vboj7i{top:-7px;}
+.r-vvn4in{background-position:center;}
+.r-vw2c0b{font-weight:bold;}
+.r-wfqgy4{transition-duration:100ms;}
+.r-wk8lta{padding-top:0px;}
+.r-ws9h79{left:4px;}
+.r-x11e5r{font-family:SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.r-x3cy2q{background-size:100% 100%;}
+.r-xx3c9p{animation-name:r-imtty0;}
+.r-y7v2we{background-color:rgba(32,36,37,1.00);}
+.r-yaralq{border-left-color:rgba(106,106,122,1.00);}
+.r-yl6sy4{color:rgba(212,175,55,0.70);}
+.r-yy2aun{font-size:26px;}
+.r-z80fyv{height:20px;}
+.r-zchlnj{right:0px;}
+.r-zx9znk{height:34px;}
+.r-zz5t5d{font-size:28px;}
+@-webkit-keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@-webkit-keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@-webkit-keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@-webkit-keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@-webkit-keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@-webkit-keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}
+@keyframes r-11cv4x{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+@keyframes r-1iq689l{0%{transform:translateY(0%);}100%{transform:translateY(100%);}}
+@keyframes r-1pzkwqh{0%{transform:translateY(100%);}100%{transform:translateY(0%);}}
+@keyframes r-imtty0{0%{opacity:0;}100%{opacity:1;}}
+@keyframes r-q67da2{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+@keyframes r-t2lo5v{0%{opacity:1;}100%{opacity:0;}}</style><link rel="icon" href="/favicon.ico"/><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script></head><body  style="background-color:#0A0A0C"><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;visibility:hidden"></div><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0 r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="background-color:rgba(242,242,242,1.00);display:flex"><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0" style="background-color:rgba(10,10,12,1.00)"><!--$--><div class="css-g5y9jx r-5c6s12 r-13awgt0"><style>
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@400;700;800&display=swap');
+          @keyframes sentence-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+          .sentence-current {
+            background: linear-gradient(120deg,#8B6914 0%,#C9950A 25%,#D4AF37 50%,#C9950A 75%,#8B6914 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sentence-shimmer 3.5s linear infinite;
+          }
+          @media (prefers-reduced-motion: reduce) { .sentence-current { animation: none; } }
+        </style><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="transform:scale(1.28) translateX(0px) translateY(0px)"><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af"><div data-expoimage="true" class="css-g5y9jx" style="overflow-x:hidden;overflow-y:hidden;position:absolute;left:0px;right:0px;top:0px;bottom:0px"></div></div></div><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao" style="background-image:linear-gradient(180deg, rgba(10,10,12,0.80), rgba(10,10,12,0.15), rgba(10,10,12,0.85))"></div><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao" style="z-index:2"><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:3.0843845447391782px;height:3.0843845447391782px;border-top-left-radius:3.0843845447391782px;border-top-right-radius:3.0843845447391782px;border-bottom-right-radius:3.0843845447391782px;border-bottom-left-radius:3.0843845447391782px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:3.417327209544163px;height:3.417327209544163px;border-top-left-radius:3.417327209544163px;border-top-right-radius:3.417327209544163px;border-bottom-right-radius:3.417327209544163px;border-bottom-left-radius:3.417327209544163px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:3.5520743938375805px;height:3.5520743938375805px;border-top-left-radius:3.5520743938375805px;border-top-right-radius:3.5520743938375805px;border-bottom-right-radius:3.5520743938375805px;border-bottom-left-radius:3.5520743938375805px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.8151454744684576px;height:2.8151454744684576px;border-top-left-radius:2.8151454744684576px;border-top-right-radius:2.8151454744684576px;border-bottom-right-radius:2.8151454744684576px;border-bottom-left-radius:2.8151454744684576px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:1.72707844291611px;height:1.72707844291611px;border-top-left-radius:1.72707844291611px;border-top-right-radius:1.72707844291611px;border-bottom-right-radius:1.72707844291611px;border-bottom-left-radius:1.72707844291611px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.9589058304712377px;height:2.9589058304712377px;border-top-left-radius:2.9589058304712377px;border-top-right-radius:2.9589058304712377px;border-bottom-right-radius:2.9589058304712377px;border-bottom-left-radius:2.9589058304712377px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.1155481199982016px;height:2.1155481199982016px;border-top-left-radius:2.1155481199982016px;border-top-right-radius:2.1155481199982016px;border-bottom-right-radius:2.1155481199982016px;border-bottom-left-radius:2.1155481199982016px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.387686588507198px;height:2.387686588507198px;border-top-left-radius:2.387686588507198px;border-top-right-radius:2.387686588507198px;border-bottom-right-radius:2.387686588507198px;border-bottom-left-radius:2.387686588507198px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:1.9561087503327381px;height:1.9561087503327381px;border-top-left-radius:1.9561087503327381px;border-top-right-radius:1.9561087503327381px;border-bottom-right-radius:1.9561087503327381px;border-bottom-left-radius:1.9561087503327381px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:3.358446910383px;height:3.358446910383px;border-top-left-radius:3.358446910383px;border-top-right-radius:3.358446910383px;border-bottom-right-radius:3.358446910383px;border-bottom-left-radius:3.358446910383px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.3402491485901424px;height:2.3402491485901424px;border-top-left-radius:2.3402491485901424px;border-top-right-radius:2.3402491485901424px;border-bottom-right-radius:2.3402491485901424px;border-bottom-left-radius:2.3402491485901424px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:3.93024124286137px;height:3.93024124286137px;border-top-left-radius:3.93024124286137px;border-top-right-radius:3.93024124286137px;border-bottom-right-radius:3.93024124286137px;border-bottom-left-radius:3.93024124286137px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:2.930552128633522px;height:2.930552128633522px;border-top-left-radius:2.930552128633522px;border-top-right-radius:2.930552128633522px;border-bottom-right-radius:2.930552128633522px;border-bottom-left-radius:2.930552128633522px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div><div class="css-g5y9jx" style="position:absolute;left:0px;top:0px;width:1.5180763226340113px;height:1.5180763226340113px;border-top-left-radius:1.5180763226340113px;border-top-right-radius:1.5180763226340113px;border-bottom-right-radius:1.5180763226340113px;border-bottom-left-radius:1.5180763226340113px;background-color:rgba(212,175,55,1.00);opacity:0;transform:translateX(0px) translateY(0px)"></div></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-11fsuwv r-1wtj0ep r-1d2f490 r-3pj75a r-wk8lta r-u8s1d r-zchlnj r-ipm5af r-mhe3cw r-w67my2"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ssbvtb"><div class="css-g5y9jx r-1mlwlqe r-1udh08x r-417010 r-eu3ka r-6m16eh"><div class="css-g5y9jx r-1niwhzg r-vvn4in r-u6sd8q r-1p0dtai r-1pi2tsx r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-13qz1uu r-1wyyakw r-ehq7j7"></div></div><div dir="auto" class="css-146c3p1 r-yl6sy4 r-1107lc r-1kfrs79 r-tsynxw" style="font-size:8px;letter-spacing:2px">Divergent Prophecies</div></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-ojf8lh"><div aria-label="Save" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-ahxqad r-bezmw2 r-ms8t9i r-zx9znk r-1777fci r-5orghg" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div><div aria-label="Load" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-ahxqad r-bezmw2 r-ms8t9i r-zx9znk r-1777fci r-5orghg" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div><div aria-label="Toggle narration" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-ms8t9i r-zx9znk r-1777fci r-5orghg r-bzcxiq r-1ulh5tz" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div><div aria-label="Settings" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-ahxqad r-bezmw2 r-ms8t9i r-zx9znk r-1777fci r-5orghg" style="transition-duration:0s"><div dir="auto" class="css-146c3p1"></div></div></div></div><div class="css-g5y9jx r-u8s1d r-1g40b8q r-12vffkv" style="left:0px;width:100%;top:78px;bottom:230px;justify-content:flex-start;padding-top:16px;padding-left:20px;padding-right:20px"><div dir="auto" class="css-146c3p1 r-jwli3a r-1rugd3m r-1vr29t4 r-5oul0u r-18jhcye" style="font-size:22px">The Prophet&#x27;s Call</div><div class="css-g5y9jx r-5hecs3 r-1hlnpa r-1ifxtd0 r-18tzken"></div><div class="css-g5y9jx r-150rngu r-eqz5dr r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-18kxxzh r-2eszeu"><div class="css-g5y9jx"><div class="css-g5y9jx" style="opacity:0;transform:translateY(14px)"><div dir="auto" class="css-146c3p1 r-1107lc r-a023e6 r-b88u0q r-1kt6imw r-f1odvy r-1mlmke2" style="color:rgba(255,138,43,1.00)">The dust settles over the valley of Elah.<!-- --> </div></div><div class="css-g5y9jx" style="opacity:0;transform:translateY(14px)"><div dir="auto" class="css-146c3p1 r-1107lc r-a023e6 r-b88u0q r-1kt6imw r-f1odvy r-1mlmke2" style="color:rgba(255,138,43,1.00)">You stand at the precipice, holding a smooth stone in your palm.<!-- --> </div></div><div class="css-g5y9jx" style="opacity:0;transform:translateY(14px)"><div dir="auto" class="css-146c3p1 r-1107lc r-a023e6 r-b88u0q r-1kt6imw r-f1odvy r-1mlmke2" style="color:rgba(255,138,43,1.00)">A voice echoes in your mind, demanding a sacrifice of comfort.<!-- --> </div></div><div class="css-g5y9jx" style="opacity:0;transform:translateY(14px)"><div dir="auto" class="css-146c3p1 r-1107lc r-a023e6 r-b88u0q r-1kt6imw r-f1odvy r-1mlmke2" style="color:rgba(255,138,43,1.00)">Eliab, the king&#x27;s eldest, watches you from the tents with jealousy.<!-- --> </div></div><div class="css-g5y9jx" style="opacity:0;transform:translateY(14px)"><div dir="auto" class="css-146c3p1 r-1107lc r-a023e6 r-b88u0q r-1kt6imw r-f1odvy r-1mlmke2" style="color:rgba(255,138,43,1.00)">Do you step forward, or withdraw into the shadow of the tribe?<!-- --> </div></div></div></div></div><div class="css-g5y9jx r-1habvwh r-u8s1d r-1x8o47i r-8fdsdq r-12vffkv" style="left:0px;right:0px;bottom:48px;justify-content:flex-end;padding-right:16px;padding-left:16px;gap:8px"><div tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-k200y r-1ferzrx r-yaralq r-ms8t9i r-df896w r-orgf3d r-1mmae3n r-3pj75a r-7s32vr" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-8akbws r-krxsd3 r-dnmrzs r-1qsk4np r-1udbk01 r-32tv8s r-1107lc r-1b43r93 r-1kfrs79 r-rjixqe" style="-webkit-line-clamp:2">Step forward into the light of the valley, offering yourself to the path.</div></div><div tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-k200y r-1ferzrx r-yaralq r-ms8t9i r-df896w r-orgf3d r-1mmae3n r-3pj75a r-7s32vr" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-8akbws r-krxsd3 r-dnmrzs r-1qsk4np r-1udbk01 r-32tv8s r-1107lc r-1b43r93 r-1kfrs79 r-rjixqe" style="-webkit-line-clamp:2">Withdraw back into the shadows of the tents to secure your tribe&#x27;s safety.</div></div><div tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-k200y r-1ferzrx r-yaralq r-ms8t9i r-df896w r-orgf3d r-1mmae3n r-3pj75a r-7s32vr" style="transition-duration:0s"><div dir="auto" class="css-146c3p1 r-8akbws r-krxsd3 r-dnmrzs r-1qsk4np r-1udbk01 r-32tv8s r-1107lc r-1b43r93 r-1kfrs79 r-rjixqe" style="-webkit-line-clamp:2">Confront Eliab directly, demanding he take responsibility.</div></div></div><div class="css-g5y9jx r-1awozwy r-1p0dtai r-1d2f490 r-1ml3abn r-u8s1d r-zchlnj r-mhe3cw r-633pao"><div class="css-g5y9jx r-18u37iz r-16pcm1t"><div dir="auto" class="css-146c3p1 r-13z8rhp r-1gkfh8e r-b88u0q r-ud0q2t" style="color:rgba(104,211,145,1.00)">RGT<!-- --> <!-- -->0</div><div dir="auto" class="css-146c3p1 r-13z8rhp r-1gkfh8e r-b88u0q r-ud0q2t" style="color:rgba(212,175,55,1.00)">PRG<!-- --> <!-- -->0</div><div dir="auto" class="css-146c3p1 r-13z8rhp r-1gkfh8e r-b88u0q r-ud0q2t" style="color:rgba(192,192,192,1.00)">RBL<!-- --> <!-- -->0</div></div></div></div><!--/$--></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-6c45ba0dc50c929d88d152a1f0863c24.js" defer></script>
+</body></html>

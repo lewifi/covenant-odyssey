@@ -1,25 +1,25 @@
-# Covenant Odyssey – Project Idea
+# Covenant Odyssey - Project Idea
 
 ## Vision
 **Covenant Odyssey** is an immersive, adult-oriented interactive branching narrative experience that brings the full spectrum of biblical narratives to life through generative AI.
 
-Players step into the role of Eliab (or other characters in add-on arcs) and make meaningful choices that echo the raw humanity of Scripture — faith, doubt, passion, war, betrayal, lust, and redemption — while steering toward dramatic conclusions.
+Players step into the role of Eliab (or other characters in add-on arcs) and make meaningful choices that echo the raw humanity of Scripture - faith, doubt, passion, war, betrayal, lust, and redemption - while steering toward dramatic conclusions.
 
 ## Core Experience
 - **Generative & Replayable**: Every playthrough can be unique while staying thematically faithful.
 - **Mature & Honest**: Includes controversial, sensual, and violent elements from the source material without sanitization.
-- **Short & Satisfying**: Designed for 20–40 minute sessions with clear paths to multiple endings.
-- **Highly Immersive**: Full-screen generative art, TTS narration, mood-based SFX (fire crackle, wind, battle, harp), save points.
+- **Short & Satisfying**: Designed for 20-40 minute sessions with clear paths to multiple endings.
+- **Highly Immersive**: Full-screen generative art, TTS narration (future release), mood-based SFX (fire crackle, wind, battle, harp), save points.
 
 ## Key Features
 - Hybrid generative engine (structured + dynamic)
 - Morality/alignment system (Righteous, Pragmatic, Rebel)
 - Modular story arcs: Kingdoms & Prophets (starting), Genesis Cycle, Fulfillment (Crucifixion & beyond), etc.
-- Free tier (first 4 scenes) → rewarded ad gate → Premium unlock
+- Free tier (first 4 scenes) -> rewarded ad gate -> Premium unlock
 - Cross-platform: Mobile, Tablet, Web
 
 ## Tone
-Epic, cinematic, emotionally charged, and spiritually reflective — blending the grandeur of classic biblical epics with modern interactive storytelling.
+Epic, cinematic, emotionally charged, and spiritually reflective - blending the grandeur of classic biblical epics with modern interactive storytelling.
 
 ## Target Audience
 Adults interested in deep, honest engagement with biblical themes through interactive fiction.
@@ -27,36 +27,28 @@ Adults interested in deep, honest engagement with biblical themes through intera
 ## Add-on Story Arcs (DLC / In-App Purchases)
 These are separate generative modules that can be unlocked individually or as a bundle:
 
-- **Genesis Cycle** – Creation, Eden, Flood, Patriarchs (Abraham, Isaac, Jacob) — heavy on wonder, temptation, family drama, and covenant origins.
-- **Exodus & Conquest** – Plagues, Red Sea, wilderness, battles for the Promised Land (Joshua, Judges) — epic wars, leadership, rebellion.
-- **Kingdoms & Prophets** – Saul, David, Solomon, divided kingdom, prophetic voices (current starting arc).
-- **Exile & Return** – Babylonian captivity, restoration, wisdom literature.
-- **Fulfillment Arc** – Life, teachings, betrayal, crucifixion, and resurrection echoes (mature themes possible).
+- **Genesis Cycle** - Creation, Eden, Flood, Patriarchs (Abraham, Isaac, Jacob) - heavy on wonder, temptation, family drama, and covenant origins.
+- **Exodus & Conquest** - Plagues, Red Sea, wilderness, battles for the Promised Land (Joshua, Judges) - epic wars, leadership, rebellion.
+- **Kingdoms & Prophets** - Saul, David, Solomon, divided kingdom, prophetic voices (current starting arc).
+- **Exile & Return** - Babylonian captivity, restoration, wisdom literature.
+- **Fulfillment Arc** - Life, teachings, betrayal, crucifixion, and resurrection echoes (mature themes possible).
 
-Users start with the Kingdoms & Prophets arc (your Eliab story). Other arcs are paid add-ons ($1.99–$3.99 each) or part of the Premium bundle. The generative engine can reference or blend arcs at convergence points for crossover playthroughs.
+Users start with the Kingdoms & Prophets arc (your Eliab story). Other arcs are paid add-ons ($1.99-$3.99 each) or part of the Premium bundle. The generative engine can reference or blend arcs at convergence points for crossover playthroughs.
 
 ## Assets & Visual Themes
 The project utilizes pre-configured assets and styling themes to maintain visual excellence:
 
 ### 1. Visual Assets
-Located under `frontend/assets/`:
-- **Main Logos & Icons**: `images/icon.png` (application icon), `images/logo-glow.png` (high-fidelity glowing header variant), and `images/favicon.png`.
-- **Navigation Icons**: Stored under `images/tabIcons/` (`home.png`, `explore.png`) for tabbed navigation triggers.
-- **Support Graphics**: `images/react-logo.png` variants, `images/expo-logo.png`, `images/expo-badge.png` variants, and `images/tutorial-web.png`.
-- **Application Icon Structure**: Layered SVG elements (`expo-symbol 2.svg`) and grid overlays configured in `expo.icon/icon.json`.
+Located under `frontend/assets/` and `temp-web/`:
+- **Main Logos & Icons**: `images/logo.png` (wordmark variant) and `images/Covenant-Odyssey-Divergent-Prophecies-og.jpg` for social previews.
+- **Support Graphics**: Moses burning bush background (`Kingdoms-and-Prophets-Moses-Tree-Fire.jpg`) and settings panel stone tablet texture (`Tablet.png`).
 
-### 2. Styling Themes (Light & Dark Modes)
-Configured under `frontend/src/constants/theme.ts`:
-- **Light Theme**:
-  - Background: `#ffffff`
-  - Elements: `#F0F0F3`
-  - Selected states: `#E0E1E6`
-  - Text colors: Primary `#000000`, Secondary `#60646C`
-- **Dark Theme (Default Game Setting)**:
-  - Background: `#000000`
-  - Elements: `#212225`
-  - Selected states: `#2E3135`
-  - Text colors: Primary `#ffffff`, Secondary `#B0B4BA`
-- **Fonts Hierarchy**: Extends the display font Spline Sans and Inter for modern, high-contrast, premium typography.
+### 2. Styling Themes (Menacing Brutalism)
+Configured under `temp-web/` and `frontend/src/`:
+- **Colors**: Raw charcoal background (`#0A0A0C`), stark white text, dirt/charcoal brown accents (`#4E3F35`), and heavy gold highlights (`#856A1E` / `#D4AF37`) for focus. Zero rounded corners globally.
+- **Typography & Font Pairings**:
+  - **Headings / Logos / Titles**: `Playfair Display` (serif) - heavy, classic, processed through ampersand pipeline.
+  - **Body / Subheadings / Buttons**: `Outfit` (sans-serif) - clean, readable.
+  - **Technical readouts / Badges**: `Courier New` (monospace) - strict alignment stats and chapter metadata.
 
-Last Updated: July 14, 2026
+Last Updated: July 15, 2026

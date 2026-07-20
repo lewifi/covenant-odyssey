@@ -89,17 +89,15 @@ export const useGameStore = create<GameState>((set) => ({
     const nextSceneId = choice.nextSceneId || (parseInt(sceneId) + 1).toString();
     const sceneIdNum = parseInt(nextSceneId);
 
-    // Check for ad gate
-    if (sceneIdNum > 4 && !isPremiumUnlocked) {
-      useGameStore.setState({ adGateTriggered: true });
-      return;
-    }
+    // Chapter 1 (all 20 scenes + the Go Wild epilogue) is fully free - no gate.
+    // Monetization begins at Chapter 2 per the Islands & Sea model: the paywall
+    // overlay stays wired for that moment, it just never fires in Chapter 1.
 
     useGameStore.setState({ isLoading: true });
     const newHistory = [...history, choice.id];
 
     try {
-      const response = await fetch('http://localhost:8787/api/generate-scene', {
+      const response = await fetch('https://covenantodyssey.lewihirvela.com/api/generate-scene', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,6 +119,7 @@ export const useGameStore = create<GameState>((set) => ({
         sceneTitle: string;
         sceneText: string;
         choices: Choice[];
+        sceneImage?: string;
       };
 
       useGameStore.setState({
@@ -128,6 +127,7 @@ export const useGameStore = create<GameState>((set) => ({
         sceneTitle: data.sceneTitle,
         sceneText: data.sceneText,
         choices: data.choices,
+        sceneImage: data.sceneImage || null,
         history: newHistory,
         righteous: nextRighteous,
         pragmatic: nextPragmatic,
@@ -193,7 +193,7 @@ export const useGameStore = create<GameState>((set) => ({
         ];
       } else if (nextSceneId === '4') {
         sceneTitle = 'The Crucible';
-        sceneText = 'You stand before the giant champion of Gath. His shield glimmers in the morning sun. Behind you, the hosts of Israel hold their breath. This is the fourth scene—the limit of the free tier. Your final strike awaits. (Running in offline fallback mode).';
+        sceneText = 'You stand before the giant champion of Gath. His shield glimmers in the morning sun. Behind you, the hosts of Israel hold their breath. This is the fourth scene - the limit of the free tier. Your final strike awaits. (Running in offline fallback mode).';
         nextChoices = [
           {
             id: 'strike_righteous',
@@ -253,7 +253,7 @@ export const useGameStore = create<GameState>((set) => ({
   saveProgress: async () => {
     const { userId, sceneId, history, righteous, pragmatic, rebel } = useGameStore.getState();
     try {
-      const response = await fetch('http://localhost:8787/api/save', {
+      const response = await fetch('https://covenantodyssey.lewihirvela.com/api/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +279,7 @@ export const useGameStore = create<GameState>((set) => ({
     const { userId } = useGameStore.getState();
     useGameStore.setState({ isLoading: true });
     try {
-      const response = await fetch(`http://localhost:8787/api/load?userId=${userId}`);
+      const response = await fetch(`https://covenantodyssey.lewihirvela.com/api/load?userId=${userId}`);
       if (!response.ok) {
         throw new Error(`Failed to load state. Status: ${response.status}`);
       }
@@ -291,7 +291,7 @@ export const useGameStore = create<GameState>((set) => ({
         rebel: number;
       };
 
-      const sceneResponse = await fetch('http://localhost:8787/api/generate-scene', {
+      const sceneResponse = await fetch('https://covenantodyssey.lewihirvela.com/api/generate-scene', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,6 +313,7 @@ export const useGameStore = create<GameState>((set) => ({
         sceneTitle: string;
         sceneText: string;
         choices: Choice[];
+        sceneImage?: string;
       };
 
       useGameStore.setState({
@@ -320,6 +321,7 @@ export const useGameStore = create<GameState>((set) => ({
         sceneTitle: sceneData.sceneTitle,
         sceneText: sceneData.sceneText,
         choices: sceneData.choices,
+        sceneImage: sceneData.sceneImage || null,
         history: data.history,
         righteous: data.righteous,
         pragmatic: data.pragmatic,

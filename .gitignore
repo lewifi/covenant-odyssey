@@ -38,8 +38,8 @@ dist/
 dist/
 worker-configuration.d.ts
 
-# Assets folder
-**/Assets/
+# Assets folder (root only)
+/Assets/
 
 # Temporary web folder
 temp-web/

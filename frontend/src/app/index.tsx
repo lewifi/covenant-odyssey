@@ -5,560 +5,750 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  useWindowDimensions,
   ActivityIndicator,
   Platform,
-  ImageBackground,
-  Image,
   Animated,
+  Easing,
+  AccessibilityInfo,
+  Image,
+  useWindowDimensions,
 } from 'react-native';
+import Head from 'expo-router/head';
+import { ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
 import { useGameStore, Choice } from '@/store/useGameStore';
 
-const LOGO_IMAGE = require('@/../../assets/images/Covenant-Odyssey-Divergent-Prophecies-Logo.png');
-const DEFAULT_BG = require('@/../../assets/images/Kingdoms-and-Prophets-Moses-Tree-Fire.jpg');
+const WORD_LOGO = require('@/assets/images/Covenant-Odyssey-Words.png');
+const FULL_LOGO = require('@/assets/images/Covenant-Odyssey-Divergent-Prophecies-Logo.png');
+const DEFAULT_BG = require('@/assets/images/Kingdoms-and-Prophets-Moses-Tree-Fire.jpg');
+const TABLET_BG = require('@/assets/images/Tablet.png');
+
+const SFX_MAP = {
+  righteous: require('@/assets/audio/righteous.wav'),
+  pragmatic: require('@/assets/audio/pragmatic.wav'),
+  rebel: require('@/assets/audio/rebel.wav'),
+};
+
+// Phase A "scene intake" - minimum cinematic breath before text burns in. The
+// pull-back starts at CHOICE TIME (masking generation latency), and the text
+// gate is max(minIntake, contentReady): snappy when the API is fast, seamless
+// when it lags (see ARCHITECTURE.md Scene Intro Camera).
+const INTAKE_MS = 5000;
+
+const GOLD = '#D4AF37';
+const HEADER_H = Platform.OS === 'web' ? 78 : 110; // word logo 54px + padding
+const ZONE_TOP = HEADER_H + 14;
+const ZONE_BOTTOM = 60;
+const MOBILE_MAX = 768;
+
+// Ampersand pipeline: headings only (Playfair ligature), never body text (ARCHITECTURE.md).
+const amp = (s: string) => s.replace(/\band\b/gi, '&');
+
+// Strip inline mood tags for display; the TTS pipeline consumes them server-side.
+function stripMoodTags(text: string): string {
+  return text.replace(/\[[a-z]+\]/gi, '').replace(/ {2,}/g, ' ').trim();
+}
+
+// ── Atmospheric dust motes: cross-platform Animated (no canvas, no deps) ──
+function Motes({ width, height, active }: { width: number; height: number; active: boolean }) {
+  const motes = React.useRef(
+    Array.from({ length: 14 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: 1.5 + Math.random() * 2.5,
+      opacity: 0.15 + Math.random() * 0.3,
+      drift: new Animated.Value(0),
+      dur: 9000 + Math.random() * 9000,
+    }))
+  ).current;
+
+  React.useEffect(() => {
+    if (!active) return;
+    const loops = motes.map((m) =>
+      Animated.loop(
+        Animated.timing(m.drift, { toValue: 1, duration: m.dur, easing: Easing.linear, useNativeDriver: true })
+      )
+    );
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [active]);
+
+  if (!active) return null;
+  return (
+    <View style={[StyleSheet.absoluteFill, { zIndex: 2 }]} pointerEvents="none">
+      {motes.map((m, i) => (
+        <Animated.View
+          key={i}
+          style={{
+            position: 'absolute',
+            left: m.x,
+            top: m.y,
+            width: m.size,
+            height: m.size,
+            borderRadius: m.size,
+            backgroundColor: GOLD,
+            opacity: m.drift.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, m.opacity, 0] }),
+            transform: [
+              { translateX: m.drift.interpolate({ inputRange: [0, 1], outputRange: [0, 60] }) },
+              { translateY: m.drift.interpolate({ inputRange: [0, 1], outputRange: [0, -40] }) },
+            ],
+          }}
+        />
+      ))}
+    </View>
+  );
+}
 
 export default function GameScreen() {
   const { width, height } = useWindowDimensions();
+  const isMobile = width < MOBILE_MAX;
 
-  // Zustand Store Hooks
-  const sceneTitle = useGameStore((state) => state.sceneTitle);
-  const sceneText = useGameStore((state) => state.sceneText);
-  const sceneImage = useGameStore((state) => state.sceneImage);
-  const choices = useGameStore((state) => state.choices);
-  const righteous = useGameStore((state) => state.righteous);
-  const pragmatic = useGameStore((state) => state.pragmatic);
-  const rebel = useGameStore((state) => state.rebel);
-  const ttsEnabled = useGameStore((state) => state.ttsEnabled);
-  const isLoading = useGameStore((state) => state.isLoading);
-  const adGateTriggered = useGameStore((state) => state.adGateTriggered);
-  const sceneId = useGameStore((state) => state.sceneId);
+  const sceneTitle = useGameStore((s) => s.sceneTitle);
+  const sceneText = useGameStore((s) => s.sceneText);
+  const sceneImage = useGameStore((s) => s.sceneImage);
+  const choices = useGameStore((s) => s.choices);
+  const righteous = useGameStore((s) => s.righteous);
+  const pragmatic = useGameStore((s) => s.pragmatic);
+  const rebel = useGameStore((s) => s.rebel);
+  const ttsEnabled = useGameStore((s) => s.ttsEnabled);
+  const isLoading = useGameStore((s) => s.isLoading);
+  const adGateTriggered = useGameStore((s) => s.adGateTriggered);
 
-  const makeChoice = useGameStore((state) => state.makeChoice);
-  const setTtsEnabled = useGameStore((state) => state.setTtsEnabled);
-  const unlockPremium = useGameStore((state) => state.unlockPremium);
-  const resetGame = useGameStore((state) => state.resetGame);
-  const loadProgress = useGameStore((state) => state.loadProgress);
-  const saveProgress = useGameStore((state) => state.saveProgress);
+  const makeChoice = useGameStore((s) => s.makeChoice);
+  const setTtsEnabled = useGameStore((s) => s.setTtsEnabled);
+  const unlockPremium = useGameStore((s) => s.unlockPremium);
+  const resetGame = useGameStore((s) => s.resetGame);
+  const loadProgress = useGameStore((s) => s.loadProgress);
+  const saveProgress = useGameStore((s) => s.saveProgress);
 
   const [hoveredChoiceId, setHoveredChoiceId] = React.useState<string | null>(null);
+  const [selectedChoiceId, setSelectedChoiceId] = React.useState<string | null>(null);
+  const [reduceMotion, setReduceMotion] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
 
-  // ─── SENTENCE REVEAL ANIMATION ───
-  // Split sceneText into sentences, reveal them staggered with fade+slide,
-  // shimmer the most-recently-revealed sentence (mimics Lumo Dreams word-glow).
+  React.useEffect(() => {
+    let mounted = true;
+    AccessibilityInfo.isReduceMotionEnabled().then((v) => {
+      if (mounted) setReduceMotion(v);
+    });
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+    return () => {
+      mounted = false;
+      // @ts-ignore subscription/function across RN versions
+      sub?.remove ? sub.remove() : sub?.();
+    };
+  }, []);
+
+  // ── Sentences: mood tags stripped, quotes detected for the divine-voice style ──
   const sentences = React.useMemo(() => {
     if (!sceneText) return [];
-    return sceneText
-      .split(/(?<=[.!?])\s+/)
-      .map(s => s.trim())
-      .filter(Boolean);
+    return stripMoodTags(sceneText)
+      .split(/(?<=[.!?"”])\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => ({ text: s, quote: /^["“]/.test(s) }));
   }, [sceneText]);
 
-  const [revealedCount, setRevealedCount] = React.useState(0);
-  const sentenceAnims = React.useRef<Animated.Value[]>([]);
+  // ── Camera: cam = intro pull-back, amb = ambient Ken Burns loop ──
+  const cam = React.useRef(new Animated.Value(0)).current;
+  const amb = React.useRef(new Animated.Value(0)).current;
 
-  // Reset + replay reveal whenever the scene text changes
+  const [revealed, setRevealed] = React.useState(0);
+  const [choicesShown, setChoicesShown] = React.useState(false);
+  // Anims are created at render time (keyed to the sentence list), so sentence
+  // nodes always mount; the effect below only DRIVES them. Never gate rendering
+  // on state that an animation callback owns.
+  const sentAnims = React.useMemo(() => sentences.map(() => new Animated.Value(0)), [sentences]);
+
+  // Set at choice-tap so the intake gate counts from the TAP, not from when the
+  // generated scene arrives - the camera has already been moving over the fetch.
+  const tapAtRef = React.useRef<number | null>(null);
+
   React.useEffect(() => {
-    setRevealedCount(0);
-    sentenceAnims.current = sentences.map(() => new Animated.Value(0));
+    if (!sentences.length) return;
+    setRevealed(0);
+    setChoicesShown(false);
+    setSelectedChoiceId(null);
+    const tapAt = tapAtRef.current;
+    tapAtRef.current = null;
+    // Initial mount starts punched-in; after a tap the camera is mid-pull
+    // already (started in onChoose), so continue from wherever it is.
+    if (!tapAt) cam.setValue(0);
+    amb.setValue(0);
+    const remaining = tapAt ? Math.max(tapAt + INTAKE_MS - Date.now(), 400) : INTAKE_MS;
 
     let cancelled = false;
-    const reveal = (idx: number) => {
-      if (cancelled || idx >= sentences.length) return;
-      Animated.spring(sentenceAnims.current[idx], {
-        toValue: 1,
-        tension: 60,
-        friction: 10,
-        useNativeDriver: true,
-      }).start(() => {
-        if (!cancelled) {
-          setRevealedCount(idx + 1);
-          setTimeout(() => reveal(idx + 1), 320);
-        }
-      });
-    };
-    const t = setTimeout(() => reveal(0), 200);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, [sceneText]);
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
-  // ─── HEADER BAR (Z-Layer 2) ───
+    const startReading = () => {
+      if (cancelled) return;
+      if (!reduceMotion) {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(amb, { toValue: 1, duration: 9000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+            Animated.timing(amb, { toValue: 0, duration: 9000, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          ])
+        ).start();
+      }
+      const revealNext = (i: number) => {
+        if (cancelled) return;
+        if (i >= sentences.length) {
+          setChoicesShown(true);
+          return;
+        }
+        Animated.timing(sentAnims[i], {
+          toValue: 1,
+          duration: reduceMotion ? 200 : 1100,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: false, // colour interpolation needs the JS driver
+        }).start();
+        setRevealed(i + 1);
+        const words = sentences[i].text.split(/\s+/).length;
+        const dwell = reduceMotion ? 140 : Math.max(1100, words * 260);
+        timers.push(setTimeout(() => revealNext(i + 1), dwell));
+      };
+      revealNext(0);
+    };
+
+    if (reduceMotion) {
+      cam.setValue(1);
+      startReading();
+    } else {
+      // Visual pull-back runs on the Animated timeline; the reveal is scheduled
+      // by a plain timer so a missed animation callback can never stall the text.
+      Animated.timing(cam, {
+        toValue: 1,
+        duration: remaining,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+      timers.push(setTimeout(startReading, remaining + 100));
+    }
+
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, [sentences, reduceMotion]);
+
+  const bgScale = Animated.add(
+    cam.interpolate({ inputRange: [0, 1], outputRange: [1.28, 1.06] }),
+    amb.interpolate({ inputRange: [0, 1], outputRange: [0, 0.06] })
+  );
+  const bgTranslateX = Animated.add(
+    cam.interpolate({ inputRange: [0, 1], outputRange: [-width * 0.12, 0] }),
+    amb.interpolate({ inputRange: [0, 1], outputRange: [0, 10] })
+  );
+  const bgTranslateY = amb.interpolate({ inputRange: [0, 1], outputRange: [0, -8] });
+
+  // Choice tap: punch the camera back in on the CURRENT art instantly and start
+  // a slow drift while the next scene generates. The moment feels directed, not
+  // loading. When the scene lands, the reveal effect finishes the pull-back.
+  const onChoose = async (choice: Choice) => {
+    setSelectedChoiceId(choice.id);
+
+    // 1. Tactile haptic feedback
+    try {
+      if (Platform.OS !== 'web') {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+    } catch (e) {
+      console.warn('Haptics failed:', e);
+    }
+
+    // 2. Play thematic SFX
+    try {
+      let soundAsset = null;
+      if (choice.alignmentEffect?.righteous) {
+        soundAsset = SFX_MAP.righteous;
+      } else if (choice.alignmentEffect?.pragmatic) {
+        soundAsset = SFX_MAP.pragmatic;
+      } else if (choice.alignmentEffect?.rebel) {
+        soundAsset = SFX_MAP.rebel;
+      }
+
+      if (soundAsset) {
+        const { sound } = await Audio.Sound.createAsync(soundAsset);
+        await sound.playAsync();
+        // Unload sound from memory after playback is completed
+        setTimeout(() => {
+          sound.unloadAsync().catch(() => {});
+        }, 2500);
+      }
+    } catch (e) {
+      console.warn('Audio play failed:', e);
+    }
+
+    if (!reduceMotion) {
+      tapAtRef.current = Date.now();
+      cam.setValue(0);
+      Animated.timing(cam, {
+        toValue: 0.6,
+        duration: INTAKE_MS * 2, // deliberately slow - still moving whenever the scene lands
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }).start();
+    }
+    makeChoice(choice);
+  };
+
+  // ── Header (Z2) ──
   const renderHeader = () => (
-    <View style={styles.headerBar}>
-      <Text style={styles.headerLogo}>COVENANT ODYSSEY</Text>
+    <View style={[styles.header, isMobile && styles.headerM]}>
+      <View style={styles.brand}>
+        <Image source={WORD_LOGO} style={isMobile ? styles.wordLogoM : styles.wordLogo} resizeMode="contain" />
+        <Text style={[styles.tagline, isMobile && { fontSize: 8, letterSpacing: 2 }]}>Divergent Prophecies</Text>
+      </View>
       <View style={styles.headerActions}>
-        <TouchableOpacity style={styles.headerBtn} onPress={saveProgress}>
-          <Text style={styles.headerBtnText}>SV</Text>
+        {isLoading && <ActivityIndicator size="small" color={GOLD} style={{ marginRight: 4 }} />}
+        <TouchableOpacity style={styles.headerBtn} onPress={saveProgress} accessibilityLabel="Save">
+          <Ionicons name="save-outline" size={18} color="#E2E2E9" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.headerBtn} onPress={loadProgress}>
-          <Text style={styles.headerBtnText}>LD</Text>
+        <TouchableOpacity style={styles.headerBtn} onPress={loadProgress} accessibilityLabel="Load">
+          <Ionicons name="folder-open-outline" size={18} color="#E2E2E9" />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.headerBtn, ttsEnabled && styles.headerBtnActive]}
           onPress={() => setTtsEnabled(!ttsEnabled)}
+          accessibilityLabel="Toggle narration"
         >
-          <Text style={styles.headerBtnText}>{ttsEnabled ? 'VOL' : 'MUT'}</Text>
+          <Ionicons name={ttsEnabled ? 'volume-high-outline' : 'volume-mute-outline'} size={18} color={ttsEnabled ? GOLD : '#E2E2E9'} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.headerBtn}>
-          <Text style={styles.headerBtnText}>CFG</Text>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => setSettingsOpen(true)} accessibilityLabel="Settings">
+          <Ionicons name="settings-outline" size={18} color="#E2E2E9" />
         </TouchableOpacity>
-        <View style={styles.chapterBadge}>
-          <Text style={styles.chapterBadgeText}>Ch. {sceneId}</Text>
-        </View>
+        {!isMobile && (
+          <View style={styles.chapterBadge}>
+            <Ionicons name="bookmark-outline" size={12} color={GOLD} />
+            <Text style={styles.chapterBadgeText}> Ch. I</Text>
+          </View>
+        )}
       </View>
     </View>
   );
 
-  // ─── STORY TEXT ZONE (Z-Layer 3, left 40%) ───
-  const renderStoryText = () => (
-    <View style={styles.storyZone}>
-      {/* Web: inject shimmer CSS once */}
-      {Platform.OS === 'web' && (
-        <style dangerouslySetInnerHTML={{__html: `
-          @keyframes sentence-shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-          .sentence-current {
-            font-weight: 700;
-            background: linear-gradient(
-              120deg,
-              #D4AF37 0%,
-              #D4AF37 30%,
-              #fff7d6 50%,
-              #D4AF37 70%,
-              #D4AF37 100%
-            );
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: sentence-shimmer 4s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(212,175,55,0.6));
-          }
-          .sentence-spoken {
-            opacity: 0.65;
-          }
-          .sentence-pending {
-            opacity: 0;
-          }
-        `}} />
-      )}
-
-      <Text style={styles.storyTitle}>{sceneTitle}</Text>
-      <View style={styles.storyDivider} />
-
+  // ── Story zone (Z3, left 50% desktop / full-width top-anchored mobile) ──
+  const renderStory = () => (
+    <View
+      style={[
+        styles.storyZone,
+        isMobile
+          ? { left: 0, width: '100%', top: HEADER_H, bottom: 230, justifyContent: 'flex-start', paddingTop: 16, paddingLeft: 20, paddingRight: 20 }
+          : null,
+      ]}
+      pointerEvents="box-none"
+    >
+      <Text style={[styles.storyTitle, isMobile && { fontSize: 22 }]}>{amp(sceneTitle)}</Text>
+      <View style={styles.divider} />
       <ScrollView style={styles.storyScroll} showsVerticalScrollIndicator={false}>
-        {sentences.map((sentence, idx) => {
-          const anim = sentenceAnims.current[idx];
-          const isRevealed = idx < revealedCount;
-          const isCurrent = idx === revealedCount - 1;
-          const isSpoken = idx < revealedCount - 1;
-
-          if (!anim) return null;
-
-          const translateY = anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [18, 0],
+        {sentences.map((sentence, i) => {
+          const a = sentAnims[i];
+          if (!a) return null;
+          const isCurrent = i === revealed - 1;
+          const translateY = a.interpolate({ inputRange: [0, 1], outputRange: [14, 0] });
+          // Burn-in: ember -> parchment (quotes cool into warm gold instead).
+          const color = a.interpolate({
+            inputRange: [0, 0.45, 1],
+            outputRange: sentence.quote ? ['#FFD700', '#E8B830', '#D9BC6B'] : ['#FF8A2B', '#D89033', '#E4E0D6'],
           });
-
-          if (Platform.OS === 'web') {
-            // Web: use CSS class for shimmer
-            return (
-              <Animated.Text
-                key={idx}
-                style={[
-                  styles.storyBody,
-                  { opacity: anim, transform: [{ translateY }], marginBottom: 6 },
-                ]}
-                // @ts-ignore web-only className
-                className={isCurrent ? 'sentence-current' : isSpoken ? 'sentence-spoken' : 'sentence-pending'}
-              >
-                {sentence}{' '}
-              </Animated.Text>
-            );
-          }
-
-          // Native: use colour + opacity for current sentence highlight
           return (
-            <Animated.Text
-              key={idx}
-              style={[
-                styles.storyBody,
-                { opacity: anim, transform: [{ translateY }], marginBottom: 6 },
-                isCurrent && styles.storyBodyCurrent,
-                isSpoken && styles.storyBodySpoken,
-              ]}
-            >
-              {sentence}{' '}
-            </Animated.Text>
+            <Animated.View key={i} style={[{ opacity: a, transform: [{ translateY }] }, sentence.quote && styles.quoteWrap]}>
+              <Animated.Text
+                // @ts-ignore web-only className for the gold read-along shimmer
+                className={Platform.OS === 'web' && isCurrent ? 'sentence-current' : undefined}
+                style={[styles.body, sentence.quote && styles.quoteText, { color }]}
+              >
+                {sentence.text}{' '}
+              </Animated.Text>
+            </Animated.View>
           );
         })}
       </ScrollView>
     </View>
   );
 
-  // ─── FOOTER BAR (Z-Layer 4) ───
-  const renderFooter = () => (
-    <View style={styles.footerBar}>
-      {/* Choice Buttons */}
-      <View style={styles.choicesContainer}>
-        {choices.map((choice) => (
+  // ── Choices (Z4, right 50% desktop / stacked bottom mobile). No alignment telegraph. ──
+  const renderChoices = () => (
+    <View
+      style={[
+        styles.choicesZone,
+        isMobile
+          ? { left: 0, right: 0, top: undefined, bottom: 48, justifyContent: 'flex-end', paddingHorizontal: 16, gap: 8 }
+          : null,
+      ]}
+      pointerEvents="box-none"
+    >
+      {choices.map((choice, idx) => {
+        const isSelected = selectedChoiceId === choice.id;
+        const isAnySelected = selectedChoiceId !== null;
+        const isDimmed = isAnySelected && !isSelected;
+
+        return (
           <TouchableOpacity
             key={choice.id}
+            activeOpacity={0.7}
+            disabled={isAnySelected || isLoading}
             style={[
-              styles.choiceButton,
-              hoveredChoiceId === choice.id && styles.choiceButtonHovered,
+              styles.choiceBtn,
+              !isMobile && { marginLeft: idx === 1 ? 24 : idx === 2 ? 12 : 0 },
+              choicesShown && styles.choiceRevealed,
+              isSelected && styles.choiceSelected,
+              isDimmed && styles.choiceDimmed,
+              hoveredChoiceId === choice.id && !isAnySelected && styles.choiceHover,
             ]}
-            onPress={() => makeChoice(choice)}
-            onMouseEnter={() => setHoveredChoiceId(choice.id)}
+            onPress={() => onChoose(choice)}
+            // @ts-ignore web hover handlers
+            onMouseEnter={() => !isAnySelected && setHoveredChoiceId(choice.id)}
             onMouseLeave={() => setHoveredChoiceId(null)}
           >
-            <View style={styles.choiceInner}>
-              <Text style={styles.choiceText}>{choice.text}</Text>
-              <View style={styles.choiceBadges}>
-                {choice.alignmentEffect.righteous ? (
-                  <Text style={styles.choiceEffectBadge}>+Righteous</Text>
-                ) : null}
-                {choice.alignmentEffect.pragmatic ? (
-                  <Text style={styles.choiceEffectBadge}>+Pragmatic</Text>
-                ) : null}
-                {choice.alignmentEffect.rebel ? (
-                  <Text style={styles.choiceEffectBadge}>+Rebel</Text>
-                ) : null}
-              </View>
-            </View>
+            <Text style={styles.choiceText} numberOfLines={2}>
+              {choice.text}
+            </Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        );
+      })}
+    </View>
+  );
 
-      {/* Alignment Stats Row */}
-      <View style={styles.alignmentRow}>
-        <View style={styles.alignmentStat}>
-          <Text style={[styles.alignmentLabel, { color: '#68D391' }]}>🕊️ R:{righteous}</Text>
-        </View>
-        <View style={styles.alignmentStat}>
-          <Text style={[styles.alignmentLabel, { color: '#D4AF37' }]}>🛡️ P:{pragmatic}</Text>
-        </View>
-        <View style={styles.alignmentStat}>
-          <Text style={[styles.alignmentLabel, { color: '#C0C0C0' }]}>⚔️ R:{rebel}</Text>
-        </View>
+  // ── Settings overlay (Z100): the stone tablet's one sanctioned home ──
+  const settingsRow = (icon: any, label: string, onPress: () => void, active = false) => (
+    <TouchableOpacity key={label} style={[styles.settingsBtn, active && styles.settingsBtnActive]} onPress={onPress}>
+      <Ionicons name={icon} size={18} color={active ? GOLD : '#E2E2E9'} />
+      <Text style={[styles.settingsBtnText, active && { color: GOLD }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderSettings = () => (
+    <View style={styles.settingsOverlay}>
+      <Image source={TABLET_BG} style={styles.settingsTablet} resizeMode="contain" />
+      <View style={styles.settingsPanel}>
+        <Text style={styles.settingsTitle}>{amp('Covenant and Order')}</Text>
+        <View style={styles.divider} />
+        {settingsRow('save-outline', 'SAVE PROGRESS', () => { saveProgress(); })}
+        {settingsRow('folder-open-outline', 'LOAD PROGRESS', () => { loadProgress(); setSettingsOpen(false); })}
+        {settingsRow(ttsEnabled ? 'volume-high-outline' : 'volume-mute-outline', ttsEnabled ? 'VOICE NARRATION: ON' : 'VOICE NARRATION: OFF', () => setTtsEnabled(!ttsEnabled), ttsEnabled)}
+        {settingsRow('refresh-outline', 'RESTART ODYSSEY', () => { resetGame(); setSettingsOpen(false); })}
+        {settingsRow('close-outline', 'RESUME', () => setSettingsOpen(false))}
       </View>
     </View>
   );
 
+  const stat = (label: string, value: number, color: string) => (
+    <Text key={label} style={[styles.stat, { color }]}>
+      {label} {value}
+    </Text>
+  );
+
   return (
     <View style={styles.root}>
-      {/* Google Fonts Loader (Web) */}
+      <Head>
+        <title>Covenant Odyssey - Divergent Prophecies</title>
+      </Head>
       {Platform.OS === 'web' && (
-        <style dangerouslySetInnerHTML={{__html: `
-          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&display=swap');
-        `}} />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@400;700;800&display=swap');
+          @keyframes sentence-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+          .sentence-current {
+            background: linear-gradient(120deg,#8B6914 0%,#C9950A 25%,#D4AF37 50%,#C9950A 75%,#8B6914 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: sentence-shimmer 3.5s linear infinite;
+          }
+          @media (prefers-reduced-motion: reduce) { .sentence-current { animation: none; } }
+        `,
+          }}
+        />
       )}
 
-      {/* Z-Layer 0: Full-bleed scene art (or dark fallback) */}
-      <View style={styles.artLayer}>
+      {/* Z0: scene art with intro pull-back + Ken Burns */}
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          { transform: [{ scale: bgScale }, { translateX: bgTranslateX }, { translateY: bgTranslateY }] },
+        ]}
+      >
         <ImageBackground
           source={sceneImage ? { uri: sceneImage } : DEFAULT_BG}
-          style={StyleSheet.absoluteFillObject}
-          resizeMode="cover"
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          contentPosition={isMobile ? { left: '66.6%', top: '50%' } : 'center'}
+          transition={600}
         />
-      </View>
+      </Animated.View>
 
-      {/* Z-Layer 1: Left gradient overlay for text readability */}
-      <LinearGradient
-        colors={['rgba(10, 10, 12, 0.75)', 'rgba(10, 10, 12, 0.45)', 'transparent']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.textGradientOverlay}
-      />
-
-      {/* Z-Layer 2: Header Bar */}
-      {renderHeader()}
-
-      {/* Z-Layer 3 & 4: Content */}
-      {isLoading ? (
-        <View style={styles.loadingOverlay}>
-          <Image
-            source={LOGO_IMAGE}
-            style={styles.loadingLogo}
-            resizeMode="contain"
-          />
-          <ActivityIndicator size="large" color="#D4AF37" style={{ marginTop: 24 }} />
-          <Text style={styles.loadingText}>Weaving the tapestry of scripture...</Text>
-        </View>
+      {/* Z1: readability gradient - left fade desktop, top+bottom fade mobile */}
+      {isMobile ? (
+        <LinearGradient
+          colors={['rgba(10,10,12,0.8)', 'rgba(10,10,12,0.15)', 'rgba(10,10,12,0.85)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
       ) : (
-        <>
-          {/* Z-Layer 3: Story Text Zone */}
-          {renderStoryText()}
-
-          {/* Z-Layer 4: Footer Bar */}
-          {renderFooter()}
-        </>
+        <LinearGradient
+          colors={['rgba(10,10,12,0.86)', 'rgba(10,10,12,0.5)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.gradient}
+          pointerEvents="none"
+        />
       )}
 
-      {/* Z-Layer 5: Paywall / Ad Gate Overlay */}
+      {/* Z2: dust motes */}
+      <Motes width={width} height={height} active={!reduceMotion} />
+
+      {renderHeader()}
+      {renderStory()}
+      {renderChoices()}
+
+      {/* Z4: stats footer - bottom CENTRE (tooltips clip off-screen when cornered) */}
+      <View style={styles.footer} pointerEvents="none">
+        <View style={styles.statsRow}>
+          {stat('RGT', righteous, '#68D391')}
+          {stat('PRG', pragmatic, GOLD)}
+          {stat('RBL', rebel, '#C0C0C0')}
+        </View>
+      </View>
+
+      {/* Z50: paywall */}
       {adGateTriggered && (
         <View style={styles.paywallOverlay}>
           <View style={styles.paywallCard}>
-            <Text style={styles.paywallIcon}>👑</Text>
+            <Image source={FULL_LOGO} style={styles.paywallLogo} resizeMode="contain" />
             <Text style={styles.paywallTitle}>Covenant Odyssey Premium</Text>
             <Text style={styles.paywallText}>
-              You have reached the end of the free trial. To continue your journey and unlock full access to Kingdoms & Prophets, Genesis, and Fulfillment chapters:
+              You have reached the end of the free trial. Continue your journey and unlock full access to Kingdoms & Prophets, Genesis, and Fulfillment chapters.
             </Text>
-
             <TouchableOpacity style={styles.premiumCTA} onPress={unlockPremium}>
-              <LinearGradient
-                colors={['#D4AF37', '#856A1E']}
-                style={styles.premiumGradient}
-              >
+              <LinearGradient colors={[GOLD, '#856A1E']} style={styles.premiumGradient}>
                 <Text style={styles.premiumCTAText}>Unlock Premium Access ($5.99)</Text>
               </LinearGradient>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.adButton} onPress={unlockPremium}>
-              <Text style={styles.adButtonText}>📺 Watch Rewarded Ad (Unlock Scene)</Text>
+              <Ionicons name="play-circle-outline" size={16} color="#A0A0B0" />
+              <Text style={styles.adButtonText}> Watch Rewarded Ad (Unlock Scene)</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.paywallReset} onPress={resetGame}>
               <Text style={styles.paywallResetText}>Restart Game</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
+
+      {/* Z100: settings - hard snap, no transition (locked rule) */}
+      {settingsOpen && renderSettings()}
     </View>
   );
 }
 
+const FONT_BODY = Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif';
+const FONT_HEAD = Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif';
+const FONT_MONO = Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace';
+
 const styles = StyleSheet.create({
-  // ─── ROOT ───
-  root: {
-    flex: 1,
-    backgroundColor: '#0A0A0C',
-  },
+  root: { flex: 1, backgroundColor: '#0A0A0C' },
 
-  // ─── Z-LAYER 0: ART BASE ───
-  artLayer: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 0,
-  },
+  gradient: { position: 'absolute', top: 0, left: 0, bottom: 0, width: '55%', zIndex: 1 },
 
-  // ─── Z-LAYER 1: TEXT READABILITY GRADIENT ───
-  textGradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    width: '50%',
-    zIndex: 1,
-  },
-
-  // ─── Z-LAYER 2: HEADER BAR ───
-  headerBar: {
+  // Header
+  header: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 10,
+    height: HEADER_H,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'web' ? 12 : 48,
-    paddingBottom: 10,
+    paddingLeft: 48,
+    paddingTop: Platform.OS === 'web' ? 0 : 36,
   },
-  headerLogo: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#D4AF37',
-    letterSpacing: 2,
-    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
+  headerM: { paddingLeft: 16 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  wordLogo: { height: 54, width: 180 },
+  wordLogoM: { height: 40, width: 132 },
+  tagline: {
+    fontFamily: FONT_BODY,
+    fontSize: 11,
+    fontWeight: '600',
+    color: 'rgba(212,175,55,0.7)',
+    letterSpacing: 3,
     textTransform: 'uppercase',
   },
-  headerActions: {
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  headerBtn: {
+    backgroundColor: 'rgba(84,67,56,0.75)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#544338',
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerBtnActive: { borderLeftColor: GOLD, backgroundColor: 'rgba(133,106,30,0.75)' },
+  chapterBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  headerBtn: {
-    backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    paddingVertical: 6,
+    backgroundColor: 'rgba(10,10,12,0.75)',
+    borderLeftWidth: 3,
+    borderLeftColor: GOLD,
+    paddingVertical: 7,
     paddingHorizontal: 10,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#3F3F54',
-  },
-  headerBtnActive: {
-    borderColor: '#D4AF37',
-    backgroundColor: 'rgba(133, 106, 30, 0.75)',
-  },
-  headerBtnText: {
-    fontSize: 16,
-  },
-  chapterBadge: {
-    backgroundColor: 'rgba(10, 10, 12, 0.75)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 0,
-    borderWidth: 2,
-    borderColor: '#544338',
   },
   chapterBadgeText: {
-    color: '#D4AF37',
+    color: GOLD,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1,
-    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    fontFamily: FONT_MONO,
     textTransform: 'uppercase',
   },
 
-  // ─── Z-LAYER 3: STORY TEXT ZONE ───
+  // Story zone (left 50%, vertically centred - locked desktop rules)
   storyZone: {
     position: 'absolute',
-    top: Platform.OS === 'web' ? 60 : 100,
-    left: 16,
-    bottom: 220,
-    width: '38%',
+    top: ZONE_TOP,
+    bottom: ZONE_BOTTOM,
+    left: 0,
+    width: '50%',
     zIndex: 3,
     justifyContent: 'center',
-    paddingRight: 8,
+    paddingLeft: 48,
+    paddingRight: 40,
   },
   storyTitle: {
+    fontFamily: FONT_HEAD,
     fontSize: 28,
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
-    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
-    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+    textShadowColor: 'rgba(0,0,0,0.9)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 8,
     marginBottom: 8,
   },
-  storyDivider: {
-    height: 3,
-    width: 60,
-    backgroundColor: '#D4AF37',
-    marginBottom: 16,
-  },
-  storyScroll: {
-    flex: 1,
-  },
-  storyBody: {
-    fontSize: 16,
-    color: '#E2E2E9',
-    lineHeight: 28,
-    fontWeight: '400',
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+  divider: { width: 56, height: 3, backgroundColor: GOLD, marginBottom: 16 },
+  storyScroll: { flexGrow: 0 },
+  body: {
+    fontFamily: FONT_BODY,
+    fontSize: 15,
+    fontWeight: '700',
+    lineHeight: 27,
+    marginBottom: 6,
+    textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 6,
+    textShadowRadius: 5,
   },
+  // Divine voice / quotes: italic behind a gold left border (left-border system)
+  quoteWrap: { borderLeftWidth: 3, borderLeftColor: GOLD, paddingLeft: 12, marginTop: 8, marginBottom: 6 },
+  quoteText: { fontStyle: 'italic' },
 
-  // ─── Z-LAYER 4: FOOTER BAR ───
-  footerBar: {
+  // Choices zone (left 52% -> right 2%, space-around - locked desktop rules)
+  choicesZone: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'web' ? 12 : 32,
-    paddingTop: 8,
+    top: ZONE_TOP,
+    bottom: ZONE_BOTTOM,
+    left: '52%',
+    right: '2%',
+    zIndex: 4,
+    justifyContent: 'space-around',
+    alignItems: 'flex-start',
   },
-  choicesContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  choiceButton: {
-    backgroundColor: 'rgba(35, 35, 51, 0.75)',
-    borderRadius: 0,
+  choiceBtn: {
+    backgroundColor: 'rgba(35,35,51,0.75)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#6A6A7A',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderWidth: 2,
-    borderColor: '#4A4A5A',
+    maxWidth: '92%',
+    alignSelf: 'flex-start',
+    opacity: 0,
+    transform: [{ translateX: 20 }],
   },
-  choiceButtonHovered: {
-    borderColor: '#D4AF37',
-    backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    shadowColor: '#D4AF37',
+  choiceRevealed: { opacity: 1, transform: [{ translateX: 0 }] },
+  choiceHover: {
+    borderLeftColor: GOLD,
+    backgroundColor: 'rgba(84,67,56,0.75)',
+    shadowColor: GOLD,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
   },
-  choiceInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  choiceSelected: {
+    borderLeftColor: GOLD,
+    backgroundColor: 'rgba(84,67,56,0.9)',
+    opacity: 1,
+    transform: [{ scale: 0.98 }, { translateX: 0 }],
+  },
+  choiceDimmed: {
+    opacity: 0.35,
+    transform: [{ translateX: 0 }],
+  },
+  choiceText: { color: '#E2E2E9', fontSize: 14, fontWeight: '600', lineHeight: 20, fontFamily: FONT_BODY },
+
+  // Stats footer - bottom centre (a cornered row clips its tooltips off-screen)
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 10, paddingVertical: 14, alignItems: 'center' },
+  statsRow: { flexDirection: 'row', gap: 20 },
+  stat: { fontFamily: FONT_MONO, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+
+  // Settings overlay (Z100) - stone tablet's one sanctioned home
+  settingsOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 100,
+    backgroundColor: 'rgba(10,10,12,0.9)',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'center',
   },
-  choiceText: {
-    color: '#E2E2E9',
-    fontSize: 14,
-    fontWeight: '600',
-    flex: 1,
-    lineHeight: 20,
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
+  settingsTablet: { position: 'absolute', width: '100%', height: '100%', opacity: 0.9 },
+  settingsPanel: { alignItems: 'stretch', gap: 10, width: 300, maxWidth: '80%' },
+  settingsTitle: {
+    fontFamily: FONT_HEAD,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#2C1810',
+    marginBottom: 4,
   },
-  choiceBadges: {
+  settingsBtn: {
     flexDirection: 'row',
-    gap: 4,
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(23,23,33,0.75)',
+    borderLeftWidth: 3,
+    borderLeftColor: '#544338',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
-  choiceEffectBadge: {
-    fontSize: 10,
+  settingsBtnActive: { borderLeftColor: GOLD, backgroundColor: 'rgba(133,106,30,0.4)' },
+  settingsBtnText: {
+    color: '#E2E2E9',
+    fontFamily: FONT_BODY,
+    fontSize: 13,
     fontWeight: '700',
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    color: '#D4AF37',
-    paddingVertical: 3,
-    paddingHorizontal: 6,
-    borderRadius: 0,
-    overflow: 'hidden',
-    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
 
-  // ─── ALIGNMENT STATS ROW ───
-  alignmentRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    paddingTop: 4,
-  },
-  alignmentStat: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-  },
-  alignmentLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    fontFamily: Platform.OS === 'web' ? "'Courier New', monospace" : 'monospace',
-    letterSpacing: 1,
-  },
-
-  // ─── LOADING OVERLAY ───
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 20,
-    backgroundColor: 'rgba(10, 10, 12, 0.85)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingLogo: {
-    width: 200,
-    height: 200,
-  },
-  loadingText: {
-    color: '#8A8A9E',
-    marginTop: 16,
-    fontSize: 15,
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-  },
-
-  // ─── Z-LAYER 5: PAYWALL OVERLAY ───
+  // Paywall
   paywallOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     zIndex: 50,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0,0,0,0.88)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -566,72 +756,30 @@ const styles = StyleSheet.create({
   paywallCard: {
     width: '100%',
     maxWidth: 480,
-    borderRadius: 0,
     padding: 32,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#D4AF37',
-    backgroundColor: 'rgba(23, 23, 33, 0.95)',
+    borderColor: GOLD,
+    backgroundColor: 'rgba(23,23,33,0.96)',
   },
-  paywallIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-  paywallTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#FFF',
-    marginBottom: 12,
-    fontFamily: Platform.OS === 'web' ? "'Playfair Display', serif" : 'serif',
-  },
-  paywallText: {
-    fontSize: 14,
-    color: '#A0A0B0',
-    lineHeight: 22,
-    textAlign: 'center',
-    marginBottom: 28,
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-  },
-  premiumCTA: {
-    width: '100%',
-    borderRadius: 0,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  premiumGradient: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  premiumCTAText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '800',
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-  },
+  paywallLogo: { width: 200, height: 120, marginBottom: 12 },
+  paywallTitle: { fontSize: 22, fontWeight: '800', color: '#FFF', marginBottom: 12, fontFamily: FONT_HEAD },
+  paywallText: { fontSize: 14, color: '#A0A0B0', lineHeight: 22, textAlign: 'center', marginBottom: 28, fontFamily: FONT_BODY },
+  premiumCTA: { width: '100%', overflow: 'hidden', marginBottom: 12 },
+  premiumGradient: { paddingVertical: 14, alignItems: 'center' },
+  premiumCTAText: { color: '#FFF', fontSize: 16, fontWeight: '800', fontFamily: FONT_BODY },
   adButton: {
     width: '100%',
-    backgroundColor: 'rgba(84, 67, 56, 0.75)',
-    paddingVertical: 14,
-    borderRadius: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#544338',
+    backgroundColor: 'rgba(84,67,56,0.75)',
+    paddingVertical: 14,
+    borderLeftWidth: 3,
+    borderLeftColor: '#544338',
     marginBottom: 20,
   },
-  adButtonText: {
-    color: '#A0A0B0',
-    fontSize: 14,
-    fontWeight: '700',
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-  },
-  paywallReset: {
-    padding: 8,
-  },
-  paywallResetText: {
-    color: '#8A8A9E',
-    fontSize: 13,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-    fontFamily: Platform.OS === 'web' ? "'Outfit', sans-serif" : 'sans-serif',
-  },
+  adButtonText: { color: '#A0A0B0', fontSize: 14, fontWeight: '700', fontFamily: FONT_BODY },
+  paywallReset: { padding: 8 },
+  paywallResetText: { color: '#8A8A9E', fontSize: 13, fontWeight: '600', textDecorationLine: 'underline', fontFamily: FONT_BODY },
 });
