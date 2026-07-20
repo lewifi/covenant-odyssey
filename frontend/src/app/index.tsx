@@ -32,6 +32,10 @@ const SFX_MAP = {
   rebel: require('@/assets/audio/rebel.wav'),
 };
 
+// Seamless 24s procedural desert-night ambience (wind + low drone), generated
+// by backend/generate-sfx.mjs. Loops forever underneath the scene at low volume.
+const ATMOS_LOOP = require('@/assets/audio/atmos-loop.wav');
+
 // Phase A "scene intake" - minimum cinematic breath before text burns in. The
 // pull-back starts at CHOICE TIME (masking generation latency), and the text
 // gate is max(minIntake, contentReady): snappy when the API is fast, seamless
@@ -172,6 +176,39 @@ export default function GameScreen() {
   // generated scene arrives - the camera has already been moving over the fetch.
   const tapAtRef = React.useRef<number | null>(null);
 
+  // ── Ambient atmos loop. Native starts on mount; web autoplay policy blocks
+  // pre-gesture audio, so the first choice tap retries (ensureAtmos is called
+  // from onChoose too). The volume button doubles as the master audio mute. ──
+  const atmosRef = React.useRef<Audio.Sound | null>(null);
+  const ensureAtmos = React.useCallback(async () => {
+    try {
+      if (!atmosRef.current) {
+        const { sound } = await Audio.Sound.createAsync(ATMOS_LOOP, { isLooping: true, volume: 0.25 });
+        atmosRef.current = sound;
+      }
+      // Web autoplay may have blocked the mount-time play; a gesture-time call
+      // must RESUME the existing sound, not early-return on it.
+      if (useGameStore.getState().ttsEnabled) {
+        const st = await atmosRef.current.getStatusAsync();
+        if (st.isLoaded && !st.isPlaying) await atmosRef.current.playAsync();
+      }
+    } catch {
+      // Blocked (web, pre-gesture) - retried on the next tap.
+    }
+  }, []);
+  React.useEffect(() => {
+    ensureAtmos();
+    return () => {
+      atmosRef.current?.unloadAsync().catch(() => {});
+      atmosRef.current = null;
+    };
+  }, []);
+  React.useEffect(() => {
+    const s = atmosRef.current;
+    if (!s) return;
+    (ttsEnabled ? s.playAsync() : s.pauseAsync()).catch(() => {});
+  }, [ttsEnabled]);
+
   React.useEffect(() => {
     if (!sentences.length) return;
     setRevealed(0);
@@ -254,6 +291,7 @@ export default function GameScreen() {
   // loading. When the scene lands, the reveal effect finishes the pull-back.
   const onChoose = async (choice: Choice) => {
     setSelectedChoiceId(choice.id);
+    ensureAtmos(); // first tap unlocks web audio - starts the ambient loop
 
     // 1. Tactile haptic feedback
     try {
