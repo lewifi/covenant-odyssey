@@ -54,10 +54,11 @@ function stripMoodTags(text: string): string {
 
 // ── Atmospheric dust motes: cross-platform Animated (no canvas, no deps) ──
 function Motes({ width, height, active }: { width: number; height: number; active: boolean }) {
+  // Use percentage values to avoid clustering at 0,0 if initial layout returns width/height as 0
   const motes = React.useRef(
     Array.from({ length: 14 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
+      xPct: Math.random(),
+      yPct: Math.random(),
       size: 1.5 + Math.random() * 2.5,
       opacity: 0.15 + Math.random() * 0.3,
       drift: new Animated.Value(0),
@@ -77,6 +78,10 @@ function Motes({ width, height, active }: { width: number; height: number; activ
   }, [active]);
 
   if (!active) return null;
+  // Fallback to absolute screen bounds if layout dimensions are not resolved yet
+  const actualW = width || 1024;
+  const actualH = height || 768;
+
   return (
     <View style={[StyleSheet.absoluteFill, { zIndex: 2 }]} pointerEvents="none">
       {motes.map((m, i) => (
@@ -84,8 +89,8 @@ function Motes({ width, height, active }: { width: number; height: number; activ
           key={i}
           style={{
             position: 'absolute',
-            left: m.x,
-            top: m.y,
+            left: m.xPct * actualW,
+            top: m.yPct * actualH,
             width: m.size,
             height: m.size,
             borderRadius: m.size,
