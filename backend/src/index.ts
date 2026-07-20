@@ -79,7 +79,10 @@ const SAFETY_SETTINGS = [
 // ─── TTS (Gemini) ───
 // Voice + model per ARCHITECTURE.md. Disabled on the client by default during
 // dev to preserve tokens; this endpoint only runs when explicitly called.
-const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+// gemini-2.5-*-tts is retired for new accounts; 3.1 is current. Fallback kept
+// for reference - 2.5 has a separate rate cap if 3.1 is ever unavailable.
+const TTS_MODEL = "gemini-3.1-flash-tts-preview";
+const TTS_MODEL_FALLBACK = "gemini-2.5-flash-preview-tts";
 const TTS_VOICE = "Zubenelgenubi";
 
 /** Decode a base64 string to raw bytes (atob is available in Workers). */
@@ -337,27 +340,37 @@ Please generate the next scene continuing the narrative from the last action in 
 				const stylePrompt = buildStylePrompt(body.text);
 				const ttsPrompt = `${stylePrompt}\n\nNarrate exactly the following text. Do not read any bracketed tags or stage directions aloud:\n\n${spoken}`;
 
-				const ttsResponse = await fetch(
-					`https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${env.GEMINI_TTS_API_KEY}`,
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({
-							contents: [{ parts: [{ text: ttsPrompt }] }],
-							generationConfig: {
-								responseModalities: ["AUDIO"],
-								speechConfig: {
-									voiceConfig: {
-										prebuiltVoiceConfig: { voiceName: TTS_VOICE },
-									},
-								},
+				const ttsBody = JSON.stringify({
+					contents: [{ parts: [{ text: ttsPrompt }] }],
+					generationConfig: {
+						responseModalities: ["AUDIO"],
+						speechConfig: {
+							voiceConfig: {
+								prebuiltVoiceConfig: { voiceName: TTS_VOICE },
 							},
-						}),
-					}
-				);
+						},
+					},
+				});
 
-				if (!ttsResponse.ok) {
-					throw new Error(`Gemini TTS returned status ${ttsResponse.status}: ${await ttsResponse.text()}`);
+				let ttsResponse: Response | null = null;
+				let lastErr = "";
+				for (const model of [TTS_MODEL, TTS_MODEL_FALLBACK]) {
+					console.log(`[TTS] Trying model: ${model}`);
+					const r = await fetch(
+						`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_TTS_API_KEY}`,
+						{ method: "POST", headers: { "Content-Type": "application/json" }, body: ttsBody }
+					);
+					if (r.ok) {
+						console.log(`[TTS] Success with model: ${model}`);
+						ttsResponse = r;
+						break;
+					}
+					const errText = await r.text();
+					console.error(`[TTS] Failed for model ${model}: status ${r.status}, response: ${errText}`);
+					lastErr = `${model} -> ${r.status} ${errText}`;
+				}
+				if (!ttsResponse) {
+					throw new Error(`Gemini TTS failed on all models: ${lastErr}`);
 				}
 
 				const data = await ttsResponse.json() as any;

@@ -65,6 +65,10 @@ const INITIAL_SCENE = {
   ],
 };
 
+const API_BASE = (typeof __DEV__ !== 'undefined' && __DEV__)
+  ? 'http://localhost:8787'
+  : 'https://covenantodyssey.lewihirvela.com';
+
 export const useGameStore = create<GameState>((set) => ({
   userId: 'eliab_dev_user',
   ...INITIAL_SCENE,
@@ -97,7 +101,7 @@ export const useGameStore = create<GameState>((set) => ({
     const newHistory = [...history, choice.id];
 
     try {
-      const response = await fetch('https://covenantodyssey.lewihirvela.com/api/generate-scene', {
+      const response = await fetch(`${API_BASE}/api/generate-scene`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +257,7 @@ export const useGameStore = create<GameState>((set) => ({
   saveProgress: async () => {
     const { userId, sceneId, history, righteous, pragmatic, rebel } = useGameStore.getState();
     try {
-      const response = await fetch('https://covenantodyssey.lewihirvela.com/api/save', {
+      const response = await fetch(`${API_BASE}/api/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +283,7 @@ export const useGameStore = create<GameState>((set) => ({
     const { userId } = useGameStore.getState();
     useGameStore.setState({ isLoading: true });
     try {
-      const response = await fetch(`https://covenantodyssey.lewihirvela.com/api/load?userId=${userId}`);
+      const response = await fetch(`${API_BASE}/api/load?userId=${userId}`);
       if (!response.ok) {
         throw new Error(`Failed to load state. Status: ${response.status}`);
       }
@@ -291,7 +295,7 @@ export const useGameStore = create<GameState>((set) => ({
         rebel: number;
       };
 
-      const sceneResponse = await fetch('https://covenantodyssey.lewihirvela.com/api/generate-scene', {
+      const sceneResponse = await fetch(`${API_BASE}/api/generate-scene`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

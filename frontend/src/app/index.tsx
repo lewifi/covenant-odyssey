@@ -49,6 +49,10 @@ const ZONE_TOP = HEADER_H + 14;
 const ZONE_BOTTOM = 60;
 const MOBILE_MAX = 768;
 
+const API_BASE = (typeof __DEV__ !== 'undefined' && __DEV__)
+  ? 'http://localhost:8787'
+  : 'https://covenantodyssey.lewihirvela.com';
+
 // Ampersand pipeline: headings only (Playfair ligature), never body text (ARCHITECTURE.md).
 const amp = (s: string) => s.replace(/\band\b/gi, '&');
 
@@ -224,6 +228,48 @@ export default function GameScreen() {
     return () => sub.remove();
   }, []);
 
+  // ── Scene narration via Gemini TTS (POST /api/tts -> MP3). Fetched per scene,
+  // played over the ambience. Only fires AFTER the first choice: web autoplay
+  // blocks pre-gesture audio, and it avoids a wasted TTS call on the initial
+  // scene. (Web-first: uses btoa/data-URI; native narration is a later pass.) ──
+  const narrationRef = React.useRef<Audio.Sound | null>(null);
+  const interactedRef = React.useRef(false);
+  const speakScene = React.useCallback(async (text: string) => {
+    try { await narrationRef.current?.unloadAsync(); } catch {}
+    narrationRef.current = null;
+    if (!text || !useGameStore.getState().ttsEnabled) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) {
+        console.warn('[TTS] API returned error status:', res.status);
+        return;
+      }
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      const b64 = typeof btoa !== 'undefined' ? btoa(bin) : '';
+      if (!b64 || !useGameStore.getState().ttsEnabled) return; // no encoder or muted mid-fetch
+      const { sound } = await Audio.Sound.createAsync({ uri: 'data:audio/mpeg;base64,' + b64 });
+      narrationRef.current = sound;
+      await sound.playAsync();
+    } catch (e) {
+      console.warn('[TTS] Failed to play audio:', e);
+      // narration is best-effort; silence on failure
+    }
+  }, []);
+  React.useEffect(() => {
+    if (interactedRef.current && ttsEnabled) {
+      speakScene(sceneText);
+    } else if (!ttsEnabled) {
+      narrationRef.current?.stopAsync().catch(() => {});
+    }
+  }, [sceneText, ttsEnabled]);
+  React.useEffect(() => () => { narrationRef.current?.unloadAsync().catch(() => {}); }, []);
+
   React.useEffect(() => {
     if (!sentences.length) return;
     setRevealed(0);
@@ -305,6 +351,7 @@ export default function GameScreen() {
   // a slow drift while the next scene generates. The moment feels directed, not
   // loading. When the scene lands, the reveal effect finishes the pull-back.
   const onChoose = async (choice: Choice) => {
+    interactedRef.current = true;
     setSelectedChoiceId(choice.id);
     ensureAtmos(); // first tap unlocks web audio - starts the ambient loop
 
@@ -370,7 +417,10 @@ export default function GameScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.headerBtn, ttsEnabled && styles.headerBtnActive]}
-          onPress={() => setTtsEnabled(!ttsEnabled)}
+          onPress={() => {
+            interactedRef.current = true;
+            setTtsEnabled(!ttsEnabled);
+          }}
           accessibilityLabel="Toggle narration"
         >
           <Ionicons name={ttsEnabled ? 'volume-high-outline' : 'volume-mute-outline'} size={18} color={ttsEnabled ? GOLD : '#E2E2E9'} />
@@ -487,7 +537,10 @@ export default function GameScreen() {
         <View style={styles.divider} />
         {settingsRow('save-outline', 'SAVE PROGRESS', () => { saveProgress(); })}
         {settingsRow('folder-open-outline', 'LOAD PROGRESS', () => { loadProgress(); setSettingsOpen(false); })}
-        {settingsRow(ttsEnabled ? 'volume-high-outline' : 'volume-mute-outline', ttsEnabled ? 'VOICE NARRATION: ON' : 'VOICE NARRATION: OFF', () => setTtsEnabled(!ttsEnabled), ttsEnabled)}
+        {settingsRow(ttsEnabled ? 'volume-high-outline' : 'volume-mute-outline', ttsEnabled ? 'VOICE NARRATION: ON' : 'VOICE NARRATION: OFF', () => {
+          interactedRef.current = true;
+          setTtsEnabled(!ttsEnabled);
+        }, ttsEnabled)}
         {settingsRow('refresh-outline', 'RESTART ODYSSEY', () => { resetGame(); setSettingsOpen(false); })}
         {settingsRow('close-outline', 'RESUME', () => setSettingsOpen(false))}
       </View>
