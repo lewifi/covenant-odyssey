@@ -10,6 +10,7 @@ import {
   Animated,
   Easing,
   AccessibilityInfo,
+  AppState,
   Image,
   useWindowDimensions,
 } from 'react-native';
@@ -208,6 +209,20 @@ export default function GameScreen() {
     if (!s) return;
     (ttsEnabled ? s.playAsync() : s.pauseAsync()).catch(() => {});
   }, [ttsEnabled]);
+  // Pause the ambience whenever the tab/app is hidden - background wind from an
+  // invisible tab reads as a haunting, not a feature. Resume on return.
+  React.useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      const s = atmosRef.current;
+      if (!s) return;
+      if (state === 'active') {
+        if (useGameStore.getState().ttsEnabled) s.playAsync().catch(() => {});
+      } else {
+        s.pauseAsync().catch(() => {});
+      }
+    });
+    return () => sub.remove();
+  }, []);
 
   React.useEffect(() => {
     if (!sentences.length) return;
