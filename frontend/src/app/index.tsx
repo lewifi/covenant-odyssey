@@ -142,6 +142,11 @@ export default function GameScreen() {
   const [selectedChoiceId, setSelectedChoiceId] = React.useState<string | null>(null);
   const [reduceMotion, setReduceMotion] = React.useState(false);
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   React.useEffect(() => {
     let mounted = true;
@@ -552,6 +557,16 @@ export default function GameScreen() {
       {label} {value}
     </Text>
   );
+
+  if (!isMounted) {
+    return (
+      <View style={styles.root}>
+        <Head>
+          <title>Covenant Odyssey - Divergent Prophecies</title>
+        </Head>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
