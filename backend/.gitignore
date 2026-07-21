@@ -53,6 +53,11 @@ build/Release
 node_modules/
 jspm_packages/
 
+# The Expo web export puts icon fonts under public/assets/node_modules/ -
+# those are deployed assets, not dependencies. Without this exception the
+# CI deploy ships a site with 404ing icon fonts.
+!public/assets/node_modules/
+
 # Snowpack dependency directory (https://snowpack.dev/)
 
 web_modules/
