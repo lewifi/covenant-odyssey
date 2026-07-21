@@ -195,7 +195,9 @@ function generateAtmos() {
       0.015 *
       Math.max(0, Math.sin(2 * Math.PI * shimmerLfo * t));
 
-    full[i] = (wind * 0.5 + drone + shimmer) * 0.8;
+    // Master low: this is a BACKGROUND bed, mastered to peak ~0.16 of full scale
+    // so it stays subliminal regardless of how the platform applies playback volume.
+    full[i] = (wind * 0.5 + drone + shimmer) * 0.18;
   }
 
   // Fold the tail into the head so noise wraps without a click.

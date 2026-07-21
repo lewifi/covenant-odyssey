@@ -36,6 +36,7 @@ const SFX_MAP = {
 // Seamless 24s procedural desert-night ambience (wind + low drone), generated
 // by backend/generate-sfx.mjs. Loops forever underneath the scene at low volume.
 const ATMOS_LOOP = require('@/assets/audio/atmos-loop.wav');
+const ATMOS_VOLUME = 0.3; // playback gain; source WAV is already mastered low (~20% FS). One dial to tune.
 
 // Phase A "scene intake" - minimum cinematic breath before text burns in. The
 // pull-back starts at CHOICE TIME (masking generation latency), and the text
@@ -245,14 +246,19 @@ export default function GameScreen() {
   const ensureAtmos = React.useCallback(async () => {
     try {
       if (!atmosRef.current) {
-        const { sound } = await Audio.Sound.createAsync(ATMOS_LOOP, { isLooping: true, volume: 0.02 });
+        const { sound } = await Audio.Sound.createAsync(ATMOS_LOOP, { isLooping: true, volume: ATMOS_VOLUME });
+        // expo-av web ignores the createAsync volume option - set it explicitly.
+        await sound.setVolumeAsync(ATMOS_VOLUME);
         atmosRef.current = sound;
       }
       // Web autoplay may have blocked the mount-time play; a gesture-time call
       // must RESUME the existing sound, not early-return on it.
       if (useGameStore.getState().ttsEnabled) {
         const st = await atmosRef.current.getStatusAsync();
-        if (st.isLoaded && !st.isPlaying) await atmosRef.current.playAsync();
+        if (st.isLoaded && !st.isPlaying) {
+          await atmosRef.current.setVolumeAsync(ATMOS_VOLUME);
+          await atmosRef.current.playAsync();
+        }
       }
     } catch {
       // Blocked (web, pre-gesture) - retried on the next tap.
